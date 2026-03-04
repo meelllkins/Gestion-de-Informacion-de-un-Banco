@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 
-public class Loan {
+public class Loan extends GeneralBankProduct {
     private int loanId;
     private LoanType loanType;
     private String applicantClientId;

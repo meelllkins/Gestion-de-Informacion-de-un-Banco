@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class GeneralBankProduct {
+public abstract class GeneralBankProduct {
     private String productCode;
     private String productName;
     private Category category;

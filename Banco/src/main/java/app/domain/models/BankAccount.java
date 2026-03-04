@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Setter
 @NoArgsConstructor
 
-public class BankAccount {
+public class BankAccount extends GeneralBankProduct {
     private String accountNumber;
     private AccountType accountType;
     private String accountHolderId;
