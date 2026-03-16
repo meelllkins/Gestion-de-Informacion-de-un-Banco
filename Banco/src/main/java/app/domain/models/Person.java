@@ -1,5 +1,5 @@
 package app.domain.models;
-import java.sql.Date;
+import java.time.LocalDate;
 
 import app.domain.enums.SystemRole;
 import lombok.Getter;
@@ -14,7 +14,7 @@ public abstract class Person {
     private String identificationId;
     private String email;
     private String phone;
-    private Date birthDate;
+    private LocalDate birthDate; //L
     private String address;
     private SystemRole systemRole;
 }

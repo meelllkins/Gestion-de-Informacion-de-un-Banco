@@ -3,5 +3,6 @@ package app.domain.enums;
 public enum AccountType {
     SAVINGS,
     CHECKING,
-    PERSONAL
+    PERSONAL,
+    BUSINESS //L
 }

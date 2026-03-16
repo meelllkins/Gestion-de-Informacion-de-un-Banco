@@ -4,7 +4,7 @@ import app.domain.enums.TransferStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -15,8 +15,8 @@ public class Transfer {
     private String sourceAccount;
     private String destinationAccount;
     private double amount;
-    private LocalDate creationDate;
-    private LocalDate approvalDate;
+    private LocalDateTime creationDate; // Corregido: LocalDateTime para manejar vencimiento a 60 min
+    private LocalDateTime approvalDate;
     private TransferStatus transferStatus;
     private int creatorUserId;
     private int approverUserId;

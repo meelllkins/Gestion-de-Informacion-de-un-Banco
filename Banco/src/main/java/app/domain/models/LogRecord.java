@@ -3,7 +3,7 @@ package app.domain.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class LogRecord {
     private String logId;
     private String operationType;
-    private LocalDate operationDateTime;
+    private LocalDateTime operationDateTime; // Corregido
     private int userId;
     private String userRole;
     private String affectedProductId;
