@@ -48,12 +48,12 @@ Ninguna.
 ### Debilidades
 - **Entidades criticas faltantes:** No existe `Transfer`/`Transferencia`. Sin esta entidad no se puede modelar el flujo de transferencias bancarias ni la regla de aprobacion para alto monto. No existe `ProductoBancario`. No existe `BitacoraOperacion`.
 - **`BankAccount` con tipos primitivos:** `balance` es `double` en lugar de `BigDecimal`. Fecha de apertura como `String` en lugar de `LocalDate` o `LocalDateTime`.
-- **Sin comportamiento en entidades:** Todas las clases parecen ser POJOs con Lombok sin metodos de negocio (`deposit()`, `withdraw()`, `approve()`, `reject()`).
+- **Sin comportamiento en entidades:** Todas las clases son POJOs sin metodos de negocio (`deposit()`, `withdraw()`, `approve()`, `reject()`).
 - **Sin puertos:** No hay ninguna interfaz de repositorio o puerto de salida.
 - **Sin servicios de dominio:** No hay ninguna clase de servicio.
 - **`TransferStatus` faltante:** Solo hay 7 enums, no se modela el estado de transferencia (PENDING, AWAITING_APPROVAL, EXECUTED, REJECTED, EXPIRED).
 - **Solo 12 archivos Java en total** — implementacion extremadamente incompleta para el alcance del enunciado.
-- **`User` usa Lombok** sin restricciones de acceso ni validaciones de negocio.
+- **`User`** no tiene restricciones de acceso ni validaciones de negocio.
 
 ---
 
