@@ -32,7 +32,7 @@ public class LogService implements ILogService {
         record.setLogId("LOG-" + String.format("%05d", nextLogId++));
         record.setOperationType(operationType);
         record.setOperationDateTime(LocalDateTime.now());
-        record.setUserId(parseId(user));
+        record.setUserId(user.getIdentificationId());
         record.setUserRole(user.getSystemRole() != null ? user.getSystemRole().toString() : "SYSTEM");
         record.setAffectedProductId(affectedProductId);
         Map<String, Object> safeDetail = (detailData != null) ? new HashMap<>(detailData) : new HashMap<>();
@@ -61,15 +61,11 @@ public class LogService implements ILogService {
     }
 
     @Override
-    public List<LogRecord> getLogsByUser(int userId, User requestingUser) {
+    public List<LogRecord> getLogsByUser(String userId, User requestingUser) {
         authService.validateRole(requestingUser, SystemRole.INTERNAL_ANALYST);
         return logStore.stream()
-                .filter(r -> r.getUserId() == userId)
+                .filter(r -> r.getUserId().equals(userId))
                 .collect(Collectors.toList());
     }
 
-    private int parseId(User user) {
-        try { return Integer.parseInt(user.getIdentificationId()); }
-        catch (NumberFormatException e) { return 0; }
-    }
 }

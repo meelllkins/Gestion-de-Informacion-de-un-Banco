@@ -38,5 +38,5 @@ public interface ILogService {
      * Retorna los registros de bitácora de un usuario específico.
      * Solo para: Analista Interno del Banco.
      */
-    List<LogRecord> getLogsByUser(int userId, User requestingUser);
+    List<LogRecord> getLogsByUser(String userId, User requestingUser);
 }

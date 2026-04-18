@@ -5,5 +5,5 @@ public enum Category {
     BUSINESS,
     MORTGAGE,
     AUTO,
-    STUDENT
+    STUDENT 
 }

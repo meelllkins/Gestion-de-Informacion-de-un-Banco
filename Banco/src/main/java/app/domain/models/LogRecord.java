@@ -14,7 +14,7 @@ public class LogRecord {
     private String logId;
     private String operationType;
     private LocalDateTime operationDateTime;  // LocalDateTime, no LocalDate
-    private int userId;
+    private String userId;
     private String userRole;
     private String affectedProductId;
     private Map<String, Object> detailData;   // ← este es el cambio
