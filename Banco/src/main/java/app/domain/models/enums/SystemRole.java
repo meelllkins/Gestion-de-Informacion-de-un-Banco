@@ -1,0 +1,11 @@
+package app.domain.models.enums;
+
+public enum SystemRole {
+    INDIVIDUAL_CUSTOMER,
+    CORPORATE_CUSTOMER,
+    TELLER_EMPLOYEE,
+    COMMERCIAL_EMPLOYEE,
+    CORPORATE_EMPLOYEE,
+    CORPORATE_SUPERVISOR,
+    INTERNAL_ANALYST
+}
