@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 
-public class CorporateCustomer extends User {
+public class CorporateCustomer extends Customer {
     private String businessName;
     private String legalRepresentative;
 }
