@@ -1,7 +1,7 @@
 package app.domain.infrastructure.adapters;
 
-import app.domain.enums.UserStatus;
 import app.domain.models.User;
+import app.domain.models.enums.UserStatus;
 import app.domain.ports.IUserPort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

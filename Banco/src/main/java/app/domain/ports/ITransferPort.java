@@ -1,7 +1,7 @@
 package app.domain.ports;
 
-import app.domain.enums.TransferStatus;
 import app.domain.models.Transfer;
+import app.domain.models.enums.TransferStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,8 +1,8 @@
 package app.domain.services.implementations;
 
-import app.domain.enums.SystemRole;
 import app.domain.models.LogRecord;
 import app.domain.models.User;
+import app.domain.models.enums.SystemRole;
 import app.domain.services.interfaces.IAuthService;
 import app.domain.services.interfaces.ILogService;
 

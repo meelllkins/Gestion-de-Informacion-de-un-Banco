@@ -1,10 +1,10 @@
 package app.domain.services.implementations;
 
-import app.domain.enums.AccountStatus;
-import app.domain.enums.SystemRole;
-import app.domain.enums.UserStatus;
 import app.domain.models.BankAccount;
 import app.domain.models.User;
+import app.domain.models.enums.AccountStatus;
+import app.domain.models.enums.SystemRole;
+import app.domain.models.enums.UserStatus;
 import app.domain.ports.IAccountPort;
 import app.domain.ports.IUserPort;
 import org.springframework.beans.factory.annotation.Autowired;

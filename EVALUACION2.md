@@ -1,4 +1,4 @@
-﻿# EVALUACION 2 — Construccion de Software II
+# EVALUACION 2 — Construccion de Software II
 **Repositorio:** Gestion-de-Informacion-de-un-Banco | **Estudiante(s):** Integrantes no informados (git: andfsanchezag) | **Rama:** develop | **Commit:** 2cafbd19 | **Fecha:** 2026-04-11
 
 ## Puntuaciones

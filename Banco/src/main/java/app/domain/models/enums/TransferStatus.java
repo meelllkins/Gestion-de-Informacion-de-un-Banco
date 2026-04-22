@@ -1,4 +1,4 @@
-package app.domain.enums;
+package app.domain.models.enums;
 
 public enum TransferStatus {
     PENDING,            // creada, sin ejecutar aún

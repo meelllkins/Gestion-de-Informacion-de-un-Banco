@@ -18,7 +18,7 @@ public interface IAuthService {
      * Valida que el usuario tenga el rol requerido para ejecutar una operación.
      * Si no tiene permiso, lanza una excepción de acceso denegado.
      */
-    void validateRole(User user, app.domain.enums.SystemRole... allowedRoles);
+    void validateRole(User user, app.domain.models.enums.SystemRole... allowedRoles);
 
     /**
      * Cierra la sesión del usuario actual.

@@ -1,7 +1,7 @@
 package app.domain.ports;
 
-import app.domain.enums.LoanStatus;
 import app.domain.models.Loan;
+import app.domain.models.enums.LoanStatus;
 
 import java.time.LocalDate;
 import java.util.List;

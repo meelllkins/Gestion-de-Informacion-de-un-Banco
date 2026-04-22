@@ -1,12 +1,13 @@
-package app.domain.controllers;
+package app.application.adapters.api.controllers;
 
-import app.domain.application.RegisterIndividualCustomer;
 import app.domain.models.IndividualCustomer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import app.domain.dto.RegisterIndividualCustomerRequest;
+
+import app.application.RegisterIndividualCustomer;
+import app.application.adapters.api.request.RegisterIndividualCustomerRequest;
 
 @RestController
 @RequestMapping("/api/customers/individual")

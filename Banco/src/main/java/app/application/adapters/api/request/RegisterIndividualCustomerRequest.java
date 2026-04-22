@@ -1,4 +1,4 @@
-package app.domain.dto;
+package app.application.adapters.api.request;
 
 import app.domain.models.IndividualCustomer;
 import lombok.Getter;

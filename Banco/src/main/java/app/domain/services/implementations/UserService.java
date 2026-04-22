@@ -1,10 +1,10 @@
 package app.domain.services.implementations;
 
-import app.domain.enums.SystemRole;
-import app.domain.enums.UserStatus;
 import app.domain.models.CorporateCustomer;
 import app.domain.models.IndividualCustomer;
 import app.domain.models.User;
+import app.domain.models.enums.SystemRole;
+import app.domain.models.enums.UserStatus;
 import app.domain.services.interfaces.IAuthService;
 import app.domain.services.interfaces.IUserService;
 

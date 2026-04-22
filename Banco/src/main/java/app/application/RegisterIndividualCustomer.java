@@ -1,9 +1,9 @@
-package app.domain.application;
+package app.application;
 
-import app.domain.enums.SystemRole;
-import app.domain.enums.UserStatus;
 import app.domain.models.IndividualCustomer;
 import app.domain.models.User;
+import app.domain.models.enums.SystemRole;
+import app.domain.models.enums.UserStatus;
 import app.domain.ports.IUserPort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

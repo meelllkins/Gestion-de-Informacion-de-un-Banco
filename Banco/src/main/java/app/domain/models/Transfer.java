@@ -1,10 +1,11 @@
 package app.domain.models;
 
-import app.domain.enums.TransferStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
+
+import app.domain.models.enums.TransferStatus;
 
 @Setter
 @Getter

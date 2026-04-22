@@ -1,10 +1,10 @@
 package app.domain.services.implementations;
 
-import app.domain.enums.SystemRole;
-import app.domain.enums.TransferStatus;
 import app.domain.models.BankAccount;
 import app.domain.models.Transfer;
 import app.domain.models.User;
+import app.domain.models.enums.SystemRole;
+import app.domain.models.enums.TransferStatus;
 import app.domain.services.interfaces.IAuthService;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ITransferService;

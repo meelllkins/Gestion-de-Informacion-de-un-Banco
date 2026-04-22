@@ -1,6 +1,6 @@
 package app.domain.models;
 
-import app.domain.enums.Category;
+import app.domain.models.enums.Category;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

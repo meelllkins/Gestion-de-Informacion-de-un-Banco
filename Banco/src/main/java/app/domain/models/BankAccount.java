@@ -1,9 +1,8 @@
 package app.domain.models;
 
-import app.domain.enums.AccountType;
-import app.domain.enums.AccountStatus;
-import app.domain.enums.Currency;
-
+import app.domain.models.enums.AccountStatus;
+import app.domain.models.enums.AccountType;
+import app.domain.models.enums.Currency;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;

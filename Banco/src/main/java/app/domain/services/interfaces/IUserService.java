@@ -37,5 +37,5 @@ public interface IUserService {
      * Cambia el estado de un usuario (Activo, Inactivo, Bloqueado).
      * Solo roles administrativos internos pueden hacerlo.
      */
-    void updateUserStatus(String identificationId, app.domain.enums.UserStatus newStatus, User requestingUser);
+    void updateUserStatus(String identificationId, app.domain.models.enums.UserStatus newStatus, User requestingUser);
 }

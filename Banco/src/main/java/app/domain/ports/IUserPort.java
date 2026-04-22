@@ -1,8 +1,8 @@
 package app.domain.ports;
  
-import app.domain.enums.UserStatus;
 import app.domain.models.User;
- 
+import app.domain.models.enums.UserStatus;
+
 import java.util.List;
 import java.util.Optional;
  

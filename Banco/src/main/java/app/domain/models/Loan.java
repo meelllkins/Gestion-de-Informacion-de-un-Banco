@@ -2,8 +2,8 @@ package app.domain.models;
 
 import java.time.LocalDate;
 
-import app.domain.enums.LoanStatus;
-import app.domain.enums.LoanType;
+import app.domain.models.enums.LoanStatus;
+import app.domain.models.enums.LoanType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

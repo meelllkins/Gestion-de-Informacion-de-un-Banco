@@ -1,7 +1,7 @@
 package app.domain.ports;
 
-import app.domain.enums.AccountStatus;
 import app.domain.models.BankAccount;
+import app.domain.models.enums.AccountStatus;
 
 import java.util.List;
 import java.util.Optional;

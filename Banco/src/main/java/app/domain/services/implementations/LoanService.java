@@ -1,11 +1,11 @@
 package app.domain.services.implementations;
 
-import app.domain.enums.LoanStatus;
-import app.domain.enums.SystemRole;
-import app.domain.enums.UserStatus;
 import app.domain.models.BankAccount;
 import app.domain.models.Loan;
 import app.domain.models.User;
+import app.domain.models.enums.LoanStatus;
+import app.domain.models.enums.SystemRole;
+import app.domain.models.enums.UserStatus;
 import app.domain.services.interfaces.IAuthService;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ILoanService;

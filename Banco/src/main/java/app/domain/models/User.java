@@ -1,9 +1,9 @@
 package app.domain.models;
 
+import app.domain.models.enums.UserStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import app.domain.enums.UserStatus;
 
 @Setter
 @Getter

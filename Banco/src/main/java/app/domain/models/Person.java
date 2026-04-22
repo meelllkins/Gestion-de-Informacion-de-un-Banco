@@ -1,7 +1,7 @@
 package app.domain.models;
 import java.time.LocalDate;
 
-import app.domain.enums.SystemRole;
+import app.domain.models.enums.SystemRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
