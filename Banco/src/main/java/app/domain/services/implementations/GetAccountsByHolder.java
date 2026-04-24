@@ -4,7 +4,6 @@ import app.domain.models.BankAccount;
 import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.ports.IAccountPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public class GetAccountsByHolder {
 
     private final IAccountPort accountPort;
 
-    @Autowired
+
     public GetAccountsByHolder(IAccountPort accountPort) {
         this.accountPort = accountPort;
     }

@@ -3,7 +3,6 @@ package app.domain.infrastructure.adapters;
 import app.domain.models.User;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IUserPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import app.domain.infrastructure.repositories.UserJpaRepository;
 
@@ -15,7 +14,7 @@ public class UserAdapter implements IUserPort {
 
     private final UserJpaRepository userJpaRepository;
 
-    @Autowired
+
     public UserAdapter(UserJpaRepository userJpaRepository) {
         this.userJpaRepository = userJpaRepository;
     }

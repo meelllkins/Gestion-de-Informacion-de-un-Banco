@@ -1,7 +1,6 @@
 package app.application.adapters.api.controllers;
 
 import app.domain.models.IndividualCustomer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +14,7 @@ public class IndividualCustomerController {
 
     private final RegisterIndividualCustomer registerIndividualCustomer;
 
-    @Autowired
+    
     public IndividualCustomerController(RegisterIndividualCustomer registerIndividualCustomer) {
         this.registerIndividualCustomer = registerIndividualCustomer;
     }

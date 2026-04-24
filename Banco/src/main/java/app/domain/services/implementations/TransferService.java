@@ -5,54 +5,50 @@ import app.domain.models.Transfer;
 import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.TransferStatus;
-import app.domain.services.interfaces.IAuthService;
+import app.domain.ports.IAccountPort;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ITransferService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Service
 public class TransferService implements ITransferService {
 
     private final List<Transfer> transfers = new ArrayList<>();
-    private final IAuthService authService;
     private final ILogService logService;
-    private final AccountService accountService; // Para validar y modificar saldos
+    private final GetActiveAccount getActiveAccount;
+    private final IAccountPort accountPort;
 
     private int nextTransferId = 1;
 
-    public TransferService(IAuthService authService, ILogService logService, AccountService accountService) {
-        this.authService = authService;
+    @Autowired
+    public TransferService(ILogService logService,
+                        GetActiveAccount getActiveAccount,
+                        IAccountPort accountPort) {
         this.logService = logService;
-        this.accountService = accountService;
+        this.getActiveAccount = getActiveAccount;
+        this.accountPort = accountPort;
     }
 
     @Override
     public Transfer createTransfer(Transfer transfer, User requestingUser) {
-        // Roles que pueden crear transferencias
-        authService.validateRole(requestingUser,
-                SystemRole.INDIVIDUAL_CUSTOMER,
-                SystemRole.CORPORATE_CUSTOMER,
-                SystemRole.CORPORATE_EMPLOYEE);
-
-        // Regla: monto > 0
         if (transfer.getAmount() <= 0) {
             throw new IllegalArgumentException("El monto de la transferencia debe ser mayor a cero.");
         }
 
-        // Validar cuenta origen activa
-        BankAccount sourceAccount = accountService.getActiveAccount(transfer.getSourceAccount());
+        BankAccount sourceAccount = getActiveAccount.getActiveAccount(transfer.getSourceAccount());
 
-        // Restricción: Empleado de Empresa solo opera cuentas de su empresa
         if (requestingUser.getSystemRole() == SystemRole.CORPORATE_EMPLOYEE) {
             if (!sourceAccount.getAccountHolderId().equals(requestingUser.getRelatedid())) {
                 throw new SecurityException("Solo puede operar cuentas de su empresa.");
             }
         }
 
-        // Restricción: Cliente Persona Natural / Empresa solo opera sus propias cuentas
         if (requestingUser.getSystemRole() == SystemRole.INDIVIDUAL_CUSTOMER ||
             requestingUser.getSystemRole() == SystemRole.CORPORATE_CUSTOMER) {
             if (!sourceAccount.getAccountHolderId().equals(requestingUser.getIdentificationId())) {
@@ -64,12 +60,10 @@ public class TransferService implements ITransferService {
         transfer.setCreationDate(LocalDateTime.now());
         transfer.setCreatorUserId(Integer.parseInt(requestingUser.getIdentificationId()));
 
-        // Determinar si requiere aprobación (Empleado de Empresa + alto monto)
         boolean requiresApproval = requestingUser.getSystemRole() == SystemRole.CORPORATE_EMPLOYEE
                 && transfer.getAmount() > HIGH_AMOUNT_THRESHOLD;
 
         if (requiresApproval) {
-            // Flujo de aprobación: queda en espera
             transfer.setTransferStatus(TransferStatus.PENDING);
             transfers.add(transfer);
 
@@ -84,7 +78,6 @@ public class TransferService implements ITransferService {
             System.out.printf("Transferencia #%d creada. Monto %.2f supera umbral → PENDING%n",
                     transfer.getTransferId(), transfer.getAmount());
         } else {
-            // Ejecución directa: validar saldo y ejecutar
             executeTransfer(transfer, sourceAccount, requestingUser);
         }
 
@@ -93,32 +86,25 @@ public class TransferService implements ITransferService {
 
     @Override
     public Transfer approveTransfer(int transferId, User supervisorUser) {
-        authService.validateRole(supervisorUser, SystemRole.CORPORATE_SUPERVISOR);
-
         Transfer transfer = getTransferById(transferId);
 
-        // Verificar que esté en el estado correcto
         if (transfer.getTransferStatus() != TransferStatus.PENDING) {
             throw new IllegalStateException(
                 "Solo se pueden aprobar transferencias en estado PENDING. Estado actual: "
                 + transfer.getTransferStatus());
         }
 
-        // Verificar que el supervisor sea de la misma empresa
-        BankAccount sourceAccount = accountService.getActiveAccount(transfer.getSourceAccount());
+        BankAccount sourceAccount = getActiveAccount.getActiveAccount(transfer.getSourceAccount());
         if (!sourceAccount.getAccountHolderId().equals(supervisorUser.getRelatedid())) {
             throw new SecurityException("Solo puede aprobar transferencias de su empresa.");
         }
 
-        // Verificar que no haya vencido (ejecutar el chequeo de vencimiento primero)
         checkAndExpireTransfers();
-        // Re-obtener por si ya venció
         transfer = getTransferById(transferId);
         if (transfer.getTransferStatus() == TransferStatus.EXPIRED) {
             throw new IllegalStateException("La transferencia #" + transferId + " ya venció.");
         }
 
-        // Ejecutar la transferencia
         executeTransfer(transfer, sourceAccount, supervisorUser);
         transfer.setApprovalDate(LocalDateTime.now());
         transfer.setApproverUserId(Integer.parseInt(supervisorUser.getIdentificationId()));
@@ -129,8 +115,6 @@ public class TransferService implements ITransferService {
 
     @Override
     public Transfer rejectTransfer(int transferId, User supervisorUser) {
-        authService.validateRole(supervisorUser, SystemRole.CORPORATE_SUPERVISOR);
-
         Transfer transfer = getTransferById(transferId);
 
         if (transfer.getTransferStatus() != TransferStatus.PENDING) {
@@ -162,7 +146,6 @@ public class TransferService implements ITransferService {
                 .forEach(t -> {
                     t.setTransferStatus(TransferStatus.EXPIRED);
 
-                    // Crear un usuario sistema para registrar el vencimiento automático
                     Map<String, Object> detail = new HashMap<>();
                     detail.put("reason", "Vencida por falta de aprobación en el tiempo establecido");
                     detail.put("expirationDateTime", now.toString());
@@ -170,47 +153,41 @@ public class TransferService implements ITransferService {
                     detail.put("amount", t.getAmount());
                     detail.put("sourceAccount", t.getSourceAccount());
 
-                    // Registrar en bitácora con usuario sistema (id=0 como proceso automático)
                     User systemUser = new User();
                     systemUser.setIdentificationId("0");
                     systemUser.setSystemRole(SystemRole.INTERNAL_ANALYST);
                     systemUser.setName("SISTEMA");
 
-                    logService.log("TRANSFER_EXPIRED", systemUser, String.valueOf(t.getTransferId()), detail);
+                    logService.log("TRANSFER_EXPIRED", systemUser,
+                            String.valueOf(t.getTransferId()), detail);
                     System.out.println("Transferencia #" + t.getTransferId() + " VENCIDA automáticamente.");
                 });
     }
 
     @Override
     public Transfer findById(int transferId, User requestingUser) {
-        checkAndExpireTransfers(); // Siempre verificar vencimientos al consultar
+        checkAndExpireTransfers();
         Transfer transfer = getTransferById(transferId);
-
-        // Restricciones de visibilidad
         validateTransferVisibility(transfer, requestingUser);
         return transfer;
     }
 
     @Override
     public List<Transfer> getPendingApprovalTransfers(User requestingUser) {
-        authService.validateRole(requestingUser,
-                SystemRole.CORPORATE_SUPERVISOR, SystemRole.INTERNAL_ANALYST);
-
         checkAndExpireTransfers();
 
         return transfers.stream()
                 .filter(t -> t.getTransferStatus() == TransferStatus.PENDING)
                 .filter(t -> {
-                    // Supervisor de empresa solo ve las de su empresa
                     if (requestingUser.getSystemRole() == SystemRole.CORPORATE_SUPERVISOR) {
                         try {
-                            BankAccount src = accountService.getActiveAccount(t.getSourceAccount());
+                            BankAccount src = getActiveAccount.getActiveAccount(t.getSourceAccount());
                             return src.getAccountHolderId().equals(requestingUser.getRelatedid());
                         } catch (Exception e) {
                             return false;
                         }
                     }
-                    return true; // Analista ve todas
+                    return true;
                 })
                 .collect(Collectors.toList());
     }
@@ -219,10 +196,9 @@ public class TransferService implements ITransferService {
     public List<Transfer> getTransferHistory(String accountNumber, User requestingUser) {
         checkAndExpireTransfers();
 
-        // Clientes solo ven su historial
         if (requestingUser.getSystemRole() == SystemRole.INDIVIDUAL_CUSTOMER ||
             requestingUser.getSystemRole() == SystemRole.CORPORATE_CUSTOMER) {
-            BankAccount account = accountService.getActiveAccount(accountNumber);
+            BankAccount account = getActiveAccount.getActiveAccount(accountNumber);
             if (!account.getAccountHolderId().equals(requestingUser.getIdentificationId())) {
                 throw new SecurityException("No puede ver el historial de cuentas de otro cliente.");
             }
@@ -238,12 +214,7 @@ public class TransferService implements ITransferService {
     // Métodos privados
     // ──────────────────────────────────────────────
 
-    /**
-     * Lógica central de ejecución de una transferencia.
-     * Descuenta saldo de origen y abona a destino.
-     */
     private void executeTransfer(Transfer transfer, BankAccount sourceAccount, User executingUser) {
-        // Validar saldo suficiente
         if (sourceAccount.getBalance() < transfer.getAmount()) {
             throw new IllegalStateException(
                 "Saldo insuficiente en cuenta origen. Disponible: " + sourceAccount.getBalance()
@@ -251,18 +222,17 @@ public class TransferService implements ITransferService {
         }
 
         double srcBefore = sourceAccount.getBalance();
-        sourceAccount.setBalance(sourceAccount.getBalance() - transfer.getAmount());
+        double srcAfter = srcBefore - transfer.getAmount();
+        accountPort.updateBalance(transfer.getSourceAccount(), srcAfter);
 
-        // Intentar abonar a la cuenta destino (si es interna)
         double dstBefore = 0;
         double dstAfter = 0;
         try {
-            BankAccount destAccount = accountService.getActiveAccount(transfer.getDestinationAccount());
+            BankAccount destAccount = getActiveAccount.getActiveAccount(transfer.getDestinationAccount());
             dstBefore = destAccount.getBalance();
-            destAccount.setBalance(destAccount.getBalance() + transfer.getAmount());
-            dstAfter = destAccount.getBalance();
+            dstAfter = dstBefore + transfer.getAmount();
+            accountPort.updateBalance(transfer.getDestinationAccount(), dstAfter);
         } catch (IllegalArgumentException e) {
-            // Cuenta destino externa o no encontrada: solo se descuenta el origen
             System.out.println("Cuenta destino no encontrada en el sistema (puede ser externa): "
                     + transfer.getDestinationAccount());
         }
@@ -275,10 +245,11 @@ public class TransferService implements ITransferService {
         detail.put("sourceAccount", transfer.getSourceAccount());
         detail.put("destinationAccount", transfer.getDestinationAccount());
         detail.put("balanceBeforeSource", srcBefore);
-        detail.put("balanceAfterSource", sourceAccount.getBalance());
+        detail.put("balanceAfterSource", srcAfter);
         detail.put("balanceBeforeDestination", dstBefore);
         detail.put("balanceAfterDestination", dstAfter);
-        logService.log("TRANSFER_EXECUTED", executingUser, String.valueOf(transfer.getTransferId()), detail);
+        logService.log("TRANSFER_EXECUTED", executingUser,
+                String.valueOf(transfer.getTransferId()), detail);
 
         System.out.printf("Transferencia #%d EJECUTADA. %.2f de %s → %s%n",
                 transfer.getTransferId(), transfer.getAmount(),
@@ -289,14 +260,15 @@ public class TransferService implements ITransferService {
         return transfers.stream()
                 .filter(t -> t.getTransferId() == transferId)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Transferencia no encontrada: #" + transferId));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Transferencia no encontrada: #" + transferId));
     }
 
     private void validateTransferVisibility(Transfer transfer, User requestingUser) {
         SystemRole role = requestingUser.getSystemRole();
         if (role == SystemRole.INDIVIDUAL_CUSTOMER || role == SystemRole.CORPORATE_CUSTOMER) {
             try {
-                BankAccount src = accountService.getActiveAccount(transfer.getSourceAccount());
+                BankAccount src = getActiveAccount.getActiveAccount(transfer.getSourceAccount());
                 if (!src.getAccountHolderId().equals(requestingUser.getIdentificationId())) {
                     throw new SecurityException("No tiene permiso para ver esta transferencia.");
                 }
