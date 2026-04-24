@@ -1,37 +1,50 @@
 package app.application.adapters.api.controllers;
 
+import app.application.adapters.api.request.RegisterIndividualCustomerRequest;
+import app.application.adapters.api.response.RegisterIndividualCustomerResponse;
+import app.application.usecases.IndividualCustomerUseCase;
 import app.domain.models.IndividualCustomer;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import app.application.RegisterIndividualCustomer;
-import app.application.adapters.api.request.RegisterIndividualCustomerRequest;
 
 @RestController
 @RequestMapping("/api/customers/individual")
 public class IndividualCustomerController {
 
-    private final RegisterIndividualCustomer registerIndividualCustomer;
+    private final IndividualCustomerUseCase individualCustomerUseCase;
 
-    
-    public IndividualCustomerController(RegisterIndividualCustomer registerIndividualCustomer) {
-        this.registerIndividualCustomer = registerIndividualCustomer;
+    public IndividualCustomerController(IndividualCustomerUseCase individualCustomerUseCase) {
+        this.individualCustomerUseCase = individualCustomerUseCase;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterIndividualCustomerRequest request) {
-        try {
-            IndividualCustomer customer = registerIndividualCustomer.register(
-                request.getCustomer(),
-                request.getUsername(),
-                request.getPassword()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(customer);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        }
+    public ResponseEntity<RegisterIndividualCustomerResponse> register(
+            @Valid @RequestBody RegisterIndividualCustomerRequest request) {
+
+        IndividualCustomer customer = new IndividualCustomer();
+        customer.setName(request.getName());
+        customer.setIdentificationId(request.getIdentificationId());
+        customer.setEmail(request.getEmail());
+        customer.setPhone(request.getPhone());
+        customer.setBirthDate(request.getBirthDate());
+        customer.setAddress(request.getAddress());
+
+        IndividualCustomer registered = individualCustomerUseCase.register(
+                customer, request.getUsername(), request.getPassword());
+
+        RegisterIndividualCustomerResponse response = new RegisterIndividualCustomerResponse(
+                registered.getName(),
+                registered.getIdentificationId(),
+                registered.getEmail(),
+                registered.getPhone(),
+                registered.getBirthDate(),
+                registered.getAddress(),
+                registered.getSystemRole(),
+                request.getUsername()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

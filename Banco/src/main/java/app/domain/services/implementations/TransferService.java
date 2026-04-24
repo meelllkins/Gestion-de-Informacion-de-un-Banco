@@ -8,7 +8,6 @@ import app.domain.models.enums.TransferStatus;
 import app.domain.ports.IAccountPort;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ITransferService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,7 +25,6 @@ public class TransferService implements ITransferService {
 
     private int nextTransferId = 1;
 
-    @Autowired
     public TransferService(ILogService logService,
                         GetActiveAccount getActiveAccount,
                         IAccountPort accountPort) {

@@ -10,7 +10,6 @@ import app.domain.ports.IAccountPort;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ILoanService;
 import app.domain.services.interfaces.IUserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,7 +27,6 @@ public class LoanService implements ILoanService {
 
     private int nextLoanId = 1;
 
-    @Autowired
     public LoanService(IUserService userService, ILogService logService,
                        GetActiveAccount getActiveAccount, IAccountPort accountPort) {
         this.userService = userService;

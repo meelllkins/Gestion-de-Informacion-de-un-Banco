@@ -6,7 +6,6 @@ import app.domain.models.enums.AccountStatus;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IAccountPort;
 import app.domain.ports.IUserPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,7 +19,6 @@ public class OpenAccount {
     private final IUserPort userPort;
     private final LogOperation logOperation;
 
-    @Autowired
     public OpenAccount(IAccountPort accountPort, IUserPort userPort,
                     LogOperation logOperation) {
         this.accountPort = accountPort;

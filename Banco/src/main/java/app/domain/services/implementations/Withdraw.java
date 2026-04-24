@@ -3,7 +3,6 @@ package app.domain.services.implementations;
 import app.domain.models.BankAccount;
 import app.domain.models.User;
 import app.domain.ports.IAccountPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -16,7 +15,6 @@ public class Withdraw {
     private final GetActiveAccount getActiveAccount;
     private final LogOperation logOperation;
 
-    @Autowired
     public Withdraw(IAccountPort accountPort,
                     GetActiveAccount getActiveAccount,
                     LogOperation logOperation) {
