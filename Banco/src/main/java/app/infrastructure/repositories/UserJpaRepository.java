@@ -1,4 +1,4 @@
-package app.domain.infrastructure.repositories;
+package app.infrastructure.repositories;
 
 import app.domain.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;

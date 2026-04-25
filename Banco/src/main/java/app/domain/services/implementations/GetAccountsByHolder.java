@@ -4,7 +4,6 @@ import app.domain.models.BankAccount;
 import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.ports.IAccountPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +13,6 @@ public class GetAccountsByHolder {
 
     private final IAccountPort accountPort;
 
-    @Autowired
     public GetAccountsByHolder(IAccountPort accountPort) {
         this.accountPort = accountPort;
     }
@@ -25,7 +23,7 @@ public class GetAccountsByHolder {
             role == SystemRole.CORPORATE_CUSTOMER ||
             role == SystemRole.CORPORATE_EMPLOYEE) {
             if (!requestingUser.getIdentificationId().equals(holderId) &&
-                !requestingUser.getRelatedid().equals(holderId)) {
+                !requestingUser.getRelatedId().equals(holderId)) {
                 throw new SecurityException("No tiene permiso para ver las cuentas de otro cliente.");
             }
         }

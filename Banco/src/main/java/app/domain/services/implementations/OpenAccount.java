@@ -3,11 +3,9 @@ package app.domain.services.implementations;
 import app.domain.models.BankAccount;
 import app.domain.models.User;
 import app.domain.models.enums.AccountStatus;
-import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IAccountPort;
 import app.domain.ports.IUserPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,21 +17,16 @@ public class OpenAccount {
 
     private final IAccountPort accountPort;
     private final IUserPort userPort;
-    private final ValidateRole validateRole;
     private final LogOperation logOperation;
 
-    @Autowired
     public OpenAccount(IAccountPort accountPort, IUserPort userPort,
-                    ValidateRole validateRole, LogOperation logOperation) {
+                       LogOperation logOperation) {
         this.accountPort = accountPort;
         this.userPort = userPort;
-        this.validateRole = validateRole;
         this.logOperation = logOperation;
     }
 
     public BankAccount openAccount(BankAccount account, User requestingUser) {
-        validateRole.validate(requestingUser,
-                SystemRole.TELLER_EMPLOYEE, SystemRole.COMMERCIAL_EMPLOYEE);
 
         User holder = userPort.findByIdentificationId(account.getAccountHolderId())
                 .orElseThrow(() -> new IllegalArgumentException(

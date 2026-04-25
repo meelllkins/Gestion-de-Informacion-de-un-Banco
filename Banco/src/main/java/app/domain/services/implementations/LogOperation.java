@@ -3,7 +3,6 @@ package app.domain.services.implementations;
 import app.domain.models.LogRecord;
 import app.domain.models.User;
 import app.domain.ports.ILogPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ public class LogOperation {
 
     private final ILogPort logPort;
 
-    @Autowired
     public LogOperation(ILogPort logPort) {
         this.logPort = logPort;
     }

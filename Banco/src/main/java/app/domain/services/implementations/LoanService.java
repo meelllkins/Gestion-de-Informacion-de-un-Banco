@@ -6,49 +6,43 @@ import app.domain.models.User;
 import app.domain.models.enums.LoanStatus;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
-import app.domain.services.interfaces.IAuthService;
+import app.domain.ports.IAccountPort;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ILoanService;
 import app.domain.services.interfaces.IUserService;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Service
 public class LoanService implements ILoanService {
 
     private final List<Loan> loans = new ArrayList<>();
-    private final IAuthService authService;
     private final IUserService userService;
     private final ILogService logService;
-    private final AccountService accountService; // Para modificar saldos en el desembolso
+    private final GetActiveAccount getActiveAccount;
+    private final IAccountPort accountPort;
 
     private int nextLoanId = 1;
 
-    public LoanService(IAuthService authService, IUserService userService,
-                       ILogService logService, AccountService accountService) {
-        this.authService = authService;
+    public LoanService(IUserService userService, ILogService logService,
+                       GetActiveAccount getActiveAccount, IAccountPort accountPort) {
         this.userService = userService;
         this.logService = logService;
-        this.accountService = accountService;
+        this.getActiveAccount = getActiveAccount;
+        this.accountPort = accountPort;
     }
 
     @Override
     public Loan requestLoan(Loan loan, User requestingUser) {
-        // Roles permitidos para solicitar un préstamo
-        authService.validateRole(requestingUser,
-                SystemRole.INDIVIDUAL_CUSTOMER,
-                SystemRole.CORPORATE_CUSTOMER,
-                SystemRole.COMMERCIAL_EMPLOYEE);
-
-        // Validar que el cliente solicitante exista y esté activo
         User client = userService.findByIdentificationId(loan.getApplicantClientId());
         if (client.getUserStatus() == UserStatus.INACTIVE || client.getUserStatus() == UserStatus.BLOCKED) {
             throw new IllegalStateException(
                 "El cliente " + loan.getApplicantClientId() + " no está activo.");
         }
 
-        // Validaciones de campos
         if (loan.getRequestedAmount() <= 0) {
             throw new IllegalArgumentException("El monto solicitado debe ser mayor a cero.");
         }
@@ -59,7 +53,6 @@ public class LoanService implements ILoanService {
             throw new IllegalArgumentException("El tipo de préstamo es obligatorio.");
         }
 
-        // Estado inicial obligatorio: PENDING
         loan.setLoanId(nextLoanId++);
         loan.setLoanStatus(LoanStatus.PENDING);
         loan.setApprovedAmount(0);
@@ -79,12 +72,8 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan approveLoan(int loanId, double approvedAmount, double interestRate, User analystUser) {
-        // Solo el Analista Interno puede aprobar
-        authService.validateRole(analystUser, SystemRole.INTERNAL_ANALYST);
-
         Loan loan = getLoanById(loanId);
 
-        // Regla de transición: solo se puede aprobar desde PENDING
         if (loan.getLoanStatus() != LoanStatus.PENDING) {
             throw new IllegalStateException(
                 "Solo se puede aprobar un préstamo en estado PENDING. Estado actual: " + loan.getLoanStatus());
@@ -116,11 +105,8 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan rejectLoan(int loanId, User analystUser) {
-        authService.validateRole(analystUser, SystemRole.INTERNAL_ANALYST);
-
         Loan loan = getLoanById(loanId);
 
-        // Regla de transición: solo se puede rechazar desde PENDING
         if (loan.getLoanStatus() != LoanStatus.PENDING) {
             throw new IllegalStateException(
                 "Solo se puede rechazar un préstamo en estado PENDING. Estado actual: " + loan.getLoanStatus());
@@ -141,33 +127,29 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan disburseLoan(int loanId, User analystUser) {
-        authService.validateRole(analystUser, SystemRole.INTERNAL_ANALYST);
-
         Loan loan = getLoanById(loanId);
 
-        // Regla de transición: solo se puede desembolsar desde APPROVED
         if (loan.getLoanStatus() != LoanStatus.APPROVED) {
             throw new IllegalStateException(
                 "Solo se puede desembolsar un préstamo en estado APPROVED. Estado actual: " + loan.getLoanStatus());
         }
 
-        // Validar que la cuenta destino esté definida
         if (loan.getDestinationAccount() == null || loan.getDestinationAccount().isBlank()) {
             throw new IllegalArgumentException(
                 "Debe definir la Cuenta_Destino_Desembolso antes de desembolsar.");
         }
 
-        // Validar que la cuenta destino exista y esté activa
-        BankAccount destAccount = accountService.getActiveAccount(loan.getDestinationAccount());
+        BankAccount destAccount = getActiveAccount.getActiveAccount(loan.getDestinationAccount());
 
-        // Validar monto aprobado > 0
         if (loan.getApprovedAmount() <= 0) {
             throw new IllegalStateException("El monto aprobado debe ser mayor a cero para desembolsar.");
         }
 
-        // Impacto financiero: aumentar saldo de la cuenta destino
         double balanceBefore = destAccount.getBalance();
-        destAccount.setBalance(destAccount.getBalance() + loan.getApprovedAmount());
+        double newBalance = balanceBefore + loan.getApprovedAmount();
+
+        // Persistir el nuevo saldo a través del puerto
+        accountPort.updateBalance(loan.getDestinationAccount(), newBalance);
 
         loan.setLoanStatus(LoanStatus.DISBURSED);
         loan.setDisbursementDate(LocalDate.now());
@@ -178,7 +160,7 @@ public class LoanService implements ILoanService {
         detail.put("disbursedAmount", loan.getApprovedAmount());
         detail.put("destinationAccount", loan.getDestinationAccount());
         detail.put("balanceBefore", balanceBefore);
-        detail.put("balanceAfter", destAccount.getBalance());
+        detail.put("balanceAfter", newBalance);
         detail.put("analystId", analystUser.getIdentificationId());
         logService.log("LOAN_DISBURSED", analystUser, String.valueOf(loanId), detail);
 
@@ -191,7 +173,6 @@ public class LoanService implements ILoanService {
     public Loan findById(int loanId, User requestingUser) {
         Loan loan = getLoanById(loanId);
 
-        // Clientes solo pueden ver sus propios préstamos
         SystemRole role = requestingUser.getSystemRole();
         if (role == SystemRole.INDIVIDUAL_CUSTOMER || role == SystemRole.CORPORATE_CUSTOMER) {
             if (!loan.getApplicantClientId().equals(requestingUser.getIdentificationId())) {
@@ -203,7 +184,6 @@ public class LoanService implements ILoanService {
 
     @Override
     public List<Loan> getLoansByClient(String clientId, User requestingUser) {
-        // Clientes solo pueden ver los suyos
         SystemRole role = requestingUser.getSystemRole();
         if (role == SystemRole.INDIVIDUAL_CUSTOMER || role == SystemRole.CORPORATE_CUSTOMER) {
             if (!clientId.equals(requestingUser.getIdentificationId())) {
@@ -217,15 +197,10 @@ public class LoanService implements ILoanService {
 
     @Override
     public List<Loan> getPendingLoans(User analystUser) {
-        authService.validateRole(analystUser, SystemRole.INTERNAL_ANALYST);
         return loans.stream()
                 .filter(l -> l.getLoanStatus() == LoanStatus.PENDING)
                 .collect(Collectors.toList());
     }
-
-    // ──────────────────────────────────────────────
-    // Métodos privados
-    // ──────────────────────────────────────────────
 
     private Loan getLoanById(int loanId) {
         return loans.stream()

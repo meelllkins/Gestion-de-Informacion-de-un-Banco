@@ -4,7 +4,6 @@ import app.domain.models.BankAccount;
 import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.ports.IAccountPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,7 +11,6 @@ public class FindAccountByNumber {
 
     private final IAccountPort accountPort;
 
-    @Autowired
     public FindAccountByNumber(IAccountPort accountPort) {
         this.accountPort = accountPort;
     }
@@ -34,7 +32,7 @@ public class FindAccountByNumber {
             }
         }
         if (role == SystemRole.CORPORATE_EMPLOYEE || role == SystemRole.CORPORATE_SUPERVISOR) {
-            if (!account.getAccountHolderId().equals(requestingUser.getRelatedid())) {
+            if (!account.getAccountHolderId().equals(requestingUser.getRelatedId())) {
                 throw new SecurityException("No tiene permiso para ver las cuentas de otra empresa.");
             }
         }

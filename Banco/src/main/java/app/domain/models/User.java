@@ -13,5 +13,5 @@ public class User extends Person {
     private String username; 
     private String password; 
     private UserStatus userStatus;
-    private String relatedid; 
+    private String relatedId; 
 }

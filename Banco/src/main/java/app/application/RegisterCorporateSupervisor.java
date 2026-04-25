@@ -1,6 +1,5 @@
 package app.application;
 
-import app.domain.models.IndividualCustomer;
 import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
@@ -11,43 +10,43 @@ import java.time.LocalDate;
 import java.time.Period;
 
 @Service
-public class RegisterIndividualCustomer {
+public class RegisterCorporateSupervisor {
 
     private final IUserPort userPort;
 
-    public RegisterIndividualCustomer(IUserPort userPort) {
+    public RegisterCorporateSupervisor(IUserPort userPort) {
         this.userPort = userPort;
     }
 
-    public IndividualCustomer register(IndividualCustomer customer,
-                                       String username, String password) {
-        validateFields(customer, username, password);
-        validateAge(customer.getBirthDate());
-        validateEmail(customer.getEmail());
-        validatePhone(customer.getPhone());
-        validateUniqueId(customer.getIdentificationId());
+    public User register(User supervisor, String username, String password) {
+        validateFields(supervisor, username, password);
+        validateAge(supervisor.getBirthDate());
+        validateEmail(supervisor.getEmail());
+        validatePhone(supervisor.getPhone());
+        validateUniqueId(supervisor.getIdentificationId());
+        validateCompany(supervisor.getRelatedId());
 
-        customer.setSystemRole(SystemRole.INDIVIDUAL_CUSTOMER);
+        supervisor.setSystemRole(SystemRole.CORPORATE_SUPERVISOR);
+        supervisor.setUsername(username);
+        supervisor.setPassword(password);
+        supervisor.setUserStatus(UserStatus.ACTIVE);
 
-        User user = buildUser(customer, username, password);
-        userPort.save(user);
-
-        return customer;
+        userPort.save(supervisor);
+        return supervisor;
     }
 
-    private void validateFields(IndividualCustomer customer,
-                                String username, String password) {
-        if (customer.getName() == null || customer.getName().isBlank())
+    private void validateFields(User supervisor, String username, String password) {
+        if (supervisor.getName() == null || supervisor.getName().isBlank())
             throw new IllegalArgumentException("El nombre es obligatorio.");
-        if (customer.getIdentificationId() == null || customer.getIdentificationId().isBlank())
+        if (supervisor.getIdentificationId() == null || supervisor.getIdentificationId().isBlank())
             throw new IllegalArgumentException("El número de identificación es obligatorio.");
-        if (customer.getEmail() == null || customer.getEmail().isBlank())
+        if (supervisor.getEmail() == null || supervisor.getEmail().isBlank())
             throw new IllegalArgumentException("El correo electrónico es obligatorio.");
-        if (customer.getPhone() == null || customer.getPhone().isBlank())
+        if (supervisor.getPhone() == null || supervisor.getPhone().isBlank())
             throw new IllegalArgumentException("El teléfono es obligatorio.");
-        if (customer.getAddress() == null || customer.getAddress().isBlank())
+        if (supervisor.getAddress() == null || supervisor.getAddress().isBlank())
             throw new IllegalArgumentException("La dirección es obligatoria.");
-        if (customer.getBirthDate() == null)
+        if (supervisor.getBirthDate() == null)
             throw new IllegalArgumentException("La fecha de nacimiento es obligatoria.");
         if (username == null || username.isBlank())
             throw new IllegalArgumentException("El nombre de usuario es obligatorio.");
@@ -58,7 +57,7 @@ public class RegisterIndividualCustomer {
     private void validateAge(LocalDate birthDate) {
         int age = Period.between(birthDate, LocalDate.now()).getYears();
         if (age < 18)
-            throw new IllegalArgumentException("El cliente debe ser mayor de edad (mínimo 18 años).");
+            throw new IllegalArgumentException("El supervisor debe ser mayor de edad (mínimo 18 años).");
     }
 
     private void validateEmail(String email) {
@@ -78,18 +77,11 @@ public class RegisterIndividualCustomer {
                 "Ya existe un usuario con el número de identificación: " + identificationId);
     }
 
-    private User buildUser(IndividualCustomer customer, String username, String password) {
-        User user = new User();
-        user.setName(customer.getName());
-        user.setIdentificationId(customer.getIdentificationId());
-        user.setEmail(customer.getEmail());
-        user.setPhone(customer.getPhone());
-        user.setBirthDate(customer.getBirthDate());
-        user.setAddress(customer.getAddress());
-        user.setSystemRole(SystemRole.INDIVIDUAL_CUSTOMER);
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setUserStatus(UserStatus.ACTIVE);
-        return user;
+    private void validateCompany(String relatedId) {
+        if (relatedId == null || relatedId.isBlank())
+            throw new IllegalArgumentException("El ID de la empresa es obligatorio.");
+        if (!userPort.existsByIdentificationId(relatedId))
+            throw new IllegalArgumentException(
+                "No existe una empresa registrada con el ID: " + relatedId);
     }
 }
