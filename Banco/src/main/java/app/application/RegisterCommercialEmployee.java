@@ -35,21 +35,21 @@ public class RegisterCommercialEmployee {
     }
 
     private void validateFields(User employee, String username, String password) {
-        if (employee.getName() == null || employee.getName().isBlank())
+        if (employee.getName() == null || employee.getName().isEmpty())
             throw new IllegalArgumentException("El nombre es obligatorio.");
-        if (employee.getIdentificationId() == null || employee.getIdentificationId().isBlank())
+        if (employee.getIdentificationId() == null || employee.getIdentificationId().isEmpty())
             throw new IllegalArgumentException("El número de identificación es obligatorio.");
-        if (employee.getEmail() == null || employee.getEmail().isBlank())
+        if (employee.getEmail() == null || employee.getEmail().isEmpty())
             throw new IllegalArgumentException("El correo electrónico es obligatorio.");
-        if (employee.getPhone() == null || employee.getPhone().isBlank())
+        if (employee.getPhone() == null || employee.getPhone().isEmpty())
             throw new IllegalArgumentException("El teléfono es obligatorio.");
-        if (employee.getAddress() == null || employee.getAddress().isBlank())
+        if (employee.getAddress() == null || employee.getAddress().isEmpty())
             throw new IllegalArgumentException("La dirección es obligatoria.");
         if (employee.getBirthDate() == null)
             throw new IllegalArgumentException("La fecha de nacimiento es obligatoria.");
-        if (username == null || username.isBlank())
+        if (username == null || username.isEmpty())
             throw new IllegalArgumentException("El nombre de usuario es obligatorio.");
-        if (password == null || password.isBlank())
+        if (password == null || password.isEmpty())
             throw new IllegalArgumentException("La contraseña es obligatoria.");
     }
 

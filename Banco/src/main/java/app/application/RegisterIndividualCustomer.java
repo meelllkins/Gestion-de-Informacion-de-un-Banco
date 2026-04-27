@@ -37,21 +37,21 @@ public class RegisterIndividualCustomer {
 
     private void validateFields(IndividualCustomer customer,
                                 String username, String password) {
-        if (customer.getName() == null || customer.getName().isBlank())
+        if (customer.getName() == null || customer.getName().isEmpty())
             throw new IllegalArgumentException("El nombre es obligatorio.");
-        if (customer.getIdentificationId() == null || customer.getIdentificationId().isBlank())
+        if (customer.getIdentificationId() == null || customer.getIdentificationId().isEmpty())
             throw new IllegalArgumentException("El número de identificación es obligatorio.");
-        if (customer.getEmail() == null || customer.getEmail().isBlank())
+        if (customer.getEmail() == null || customer.getEmail().isEmpty())
             throw new IllegalArgumentException("El correo electrónico es obligatorio.");
-        if (customer.getPhone() == null || customer.getPhone().isBlank())
+        if (customer.getPhone() == null || customer.getPhone().isEmpty())
             throw new IllegalArgumentException("El teléfono es obligatorio.");
-        if (customer.getAddress() == null || customer.getAddress().isBlank())
+        if (customer.getAddress() == null || customer.getAddress().isEmpty())
             throw new IllegalArgumentException("La dirección es obligatoria.");
         if (customer.getBirthDate() == null)
             throw new IllegalArgumentException("La fecha de nacimiento es obligatoria.");
-        if (username == null || username.isBlank())
+        if (username == null || username.isEmpty())
             throw new IllegalArgumentException("El nombre de usuario es obligatorio.");
-        if (password == null || password.isBlank())
+        if (password == null || password.isEmpty())
             throw new IllegalArgumentException("La contraseña es obligatoria.");
     }
 
