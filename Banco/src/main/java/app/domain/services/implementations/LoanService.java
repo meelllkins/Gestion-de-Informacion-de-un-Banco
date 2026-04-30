@@ -7,9 +7,9 @@ import app.domain.models.enums.LoanStatus;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IAccountPort;
+import app.domain.ports.IUserPort;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ILoanService;
-import app.domain.services.interfaces.IUserService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,17 +19,17 @@ import java.util.stream.Collectors;
 @Service
 public class LoanService implements ILoanService {
 
-    private final List<Loan> loans = new ArrayList<>();
-    private final IUserService userService;
+    private final IUserPort userPort;
     private final ILogService logService;
     private final GetActiveAccount getActiveAccount;
     private final IAccountPort accountPort;
 
+    private final List<Loan> loans = new ArrayList<>();
     private int nextLoanId = 1;
 
-    public LoanService(IUserService userService, ILogService logService,
+    public LoanService(IUserPort userPort, ILogService logService,
                        GetActiveAccount getActiveAccount, IAccountPort accountPort) {
-        this.userService = userService;
+        this.userPort = userPort;
         this.logService = logService;
         this.getActiveAccount = getActiveAccount;
         this.accountPort = accountPort;
@@ -37,7 +37,10 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan requestLoan(Loan loan, User requestingUser) {
-        User client = userService.findByIdentificationId(loan.getApplicantClientId());
+        User client = userPort.findByIdentificationId(loan.getApplicantClientId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No existe un cliente con ID: " + loan.getApplicantClientId()));
+
         if (client.getUserStatus() == UserStatus.INACTIVE || client.getUserStatus() == UserStatus.BLOCKED) {
             throw new IllegalStateException(
                 "El cliente " + loan.getApplicantClientId() + " no está activo.");
@@ -66,7 +69,6 @@ public class LoanService implements ILoanService {
         detail.put("termMonths", loan.getTermMonths());
         logService.log("LOAN_REQUESTED", requestingUser, String.valueOf(loan.getLoanId()), detail);
 
-        System.out.println("Solicitud de préstamo #" + loan.getLoanId() + " creada. Estado: PENDING");
         return loan;
     }
 
@@ -99,7 +101,6 @@ public class LoanService implements ILoanService {
         detail.put("analystId", analystUser.getIdentificationId());
         logService.log("LOAN_APPROVED", analystUser, String.valueOf(loanId), detail);
 
-        System.out.println("Préstamo #" + loanId + " APROBADO. Monto: " + approvedAmount);
         return loan;
     }
 
@@ -121,7 +122,6 @@ public class LoanService implements ILoanService {
         detail.put("analystId", analystUser.getIdentificationId());
         logService.log("LOAN_REJECTED", analystUser, String.valueOf(loanId), detail);
 
-        System.out.println("Préstamo #" + loanId + " RECHAZADO.");
         return loan;
     }
 
@@ -147,8 +147,6 @@ public class LoanService implements ILoanService {
 
         double balanceBefore = destAccount.getBalance();
         double newBalance = balanceBefore + loan.getApprovedAmount();
-
-        // Persistir el nuevo saldo a través del puerto
         accountPort.updateBalance(loan.getDestinationAccount(), newBalance);
 
         loan.setLoanStatus(LoanStatus.DISBURSED);
@@ -164,8 +162,6 @@ public class LoanService implements ILoanService {
         detail.put("analystId", analystUser.getIdentificationId());
         logService.log("LOAN_DISBURSED", analystUser, String.valueOf(loanId), detail);
 
-        System.out.printf("Préstamo #%d DESEMBOLSADO. %.2f abonados a cuenta %s.%n",
-                loanId, loan.getApprovedAmount(), loan.getDestinationAccount());
         return loan;
     }
 
