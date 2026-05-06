@@ -33,7 +33,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
 
                     // ── Públicos ──────────────────────────────────────
-                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/auth/login").permitAll()
 
                     // ── Registro de clientes (público) ────────────────
                     .requestMatchers(HttpMethod.POST, "/api/customers/individual/register").permitAll()

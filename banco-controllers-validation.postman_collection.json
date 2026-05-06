@@ -1,0 +1,761 @@
+{
+  "info": {
+    "name": "Banco Controllers Validation",
+    "description": "Colección de validación para todos los controllers del módulo Banco. Incluye casos felices y negativos para auth, clientes y empleados.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "analyst_username",
+      "value": "analyst_user",
+      "type": "string"
+    },
+    {
+      "key": "analyst_password",
+      "value": "analyst_password",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "description": "Endpoints de autenticación - públicos, sin Authorization requerida",
+      "item": [
+        {
+          "name": "1.1 Login - Caso Feliz",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"analyst_user\",\n  \"password\": \"analyst_password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.2 Login - Username vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"\",\n  \"password\": \"analyst_password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.3 Login - Password vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"analyst_user\",\n  \"password\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.4 Login - Username null",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": null,\n  \"password\": \"analyst_password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Individual Customers",
+      "description": "Endpoints para clientes individuales - públicos, sin Authorization requerida",
+      "item": [
+        {
+          "name": "2.1 Register Individual Customer - Caso Feliz",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez García\",\n  \"identificationId\": \"1234567890\",\n  \"email\": \"juan.perez@example.com\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1990-05-15\",\n  \"address\": \"Calle 123 #45-67, Bogotá\",\n  \"systemRole\": \"INDIVIDUAL_CUSTOMER\",\n  \"username\": \"juan_perez_123\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/individual/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "individual", "register"]
+            }
+          }
+        },
+        {
+          "name": "2.2 Register Individual Customer - Name vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"identificationId\": \"1234567890\",\n  \"email\": \"juan.perez@example.com\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1990-05-15\",\n  \"address\": \"Calle 123 #45-67, Bogotá\",\n  \"systemRole\": \"INDIVIDUAL_CUSTOMER\",\n  \"username\": \"juan_perez_123\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/individual/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "individual", "register"]
+            }
+          }
+        },
+        {
+          "name": "2.3 Register Individual Customer - birthDate null",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez García\",\n  \"identificationId\": \"1234567890\",\n  \"email\": \"juan.perez@example.com\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": null,\n  \"address\": \"Calle 123 #45-67, Bogotá\",\n  \"systemRole\": \"INDIVIDUAL_CUSTOMER\",\n  \"username\": \"juan_perez_123\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/individual/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "individual", "register"]
+            }
+          }
+        },
+        {
+          "name": "2.4 Register Individual Customer - systemRole null",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez García\",\n  \"identificationId\": \"1234567890\",\n  \"email\": \"juan.perez@example.com\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1990-05-15\",\n  \"address\": \"Calle 123 #45-67, Bogotá\",\n  \"systemRole\": null,\n  \"username\": \"juan_perez_123\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/individual/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "individual", "register"]
+            }
+          }
+        },
+        {
+          "name": "2.5 Register Individual Customer - Email vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez García\",\n  \"identificationId\": \"1234567890\",\n  \"email\": \"\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1990-05-15\",\n  \"address\": \"Calle 123 #45-67, Bogotá\",\n  \"systemRole\": \"INDIVIDUAL_CUSTOMER\",\n  \"username\": \"juan_perez_123\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/individual/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "individual", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Corporate Customers",
+      "description": "Endpoints para clientes corporativos - públicos, sin Authorization requerida",
+      "item": [
+        {
+          "name": "3.1 Register Corporate Customer - Caso Feliz",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Empresa XYZ S.A.\",\n  \"identificationId\": \"9876543210\",\n  \"email\": \"contacto@empresaxyz.com\",\n  \"phone\": \"3157654321\",\n  \"address\": \"Avenida Principal 500, Bogotá\",\n  \"legalRepresentative\": \"Carlos Rodríguez López\",\n  \"username\": \"empresa_xyz_admin\",\n  \"password\": \"CorporatePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/corporate/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "corporate", "register"]
+            }
+          }
+        },
+        {
+          "name": "3.2 Register Corporate Customer - businessName vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"\",\n  \"identificationId\": \"9876543210\",\n  \"email\": \"contacto@empresaxyz.com\",\n  \"phone\": \"3157654321\",\n  \"address\": \"Avenida Principal 500, Bogotá\",\n  \"legalRepresentative\": \"Carlos Rodríguez López\",\n  \"username\": \"empresa_xyz_admin\",\n  \"password\": \"CorporatePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/corporate/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "corporate", "register"]
+            }
+          }
+        },
+        {
+          "name": "3.3 Register Corporate Customer - legalRepresentative vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Empresa XYZ S.A.\",\n  \"identificationId\": \"9876543210\",\n  \"email\": \"contacto@empresaxyz.com\",\n  \"phone\": \"3157654321\",\n  \"address\": \"Avenida Principal 500, Bogotá\",\n  \"legalRepresentative\": \"\",\n  \"username\": \"empresa_xyz_admin\",\n  \"password\": \"CorporatePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/corporate/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "corporate", "register"]
+            }
+          }
+        },
+        {
+          "name": "3.4 Register Corporate Customer - identificationId vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Empresa XYZ S.A.\",\n  \"identificationId\": \"\",\n  \"email\": \"contacto@empresaxyz.com\",\n  \"phone\": \"3157654321\",\n  \"address\": \"Avenida Principal 500, Bogotá\",\n  \"legalRepresentative\": \"Carlos Rodríguez López\",\n  \"username\": \"empresa_xyz_admin\",\n  \"password\": \"CorporatePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/corporate/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "corporate", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Commercial Employees",
+      "description": "Endpoints para empleados comerciales - PROTEGIDOS CON BEARER TOKEN (requiere INTERNAL_ANALYST)",
+      "item": [
+        {
+          "name": "4.1 Register Commercial Employee - Caso Feliz (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"María González López\",\n  \"identificationId\": \"1111111111\",\n  \"email\": \"maria.gonzalez@banco.com\",\n  \"phone\": \"3012345678\",\n  \"address\": \"Calle 50 #10-20, Medellín\",\n  \"birthDate\": \"1992-03-20\",\n  \"systemRole\": \"COMMERCIAL_EMPLOYEE\",\n  \"username\": \"maria_comercial\",\n  \"password\": \"EmployeePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/commercial/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "commercial", "register"]
+            }
+          }
+        },
+        {
+          "name": "4.2 Register Commercial Employee - Sin Authorization (negativo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"María González López\",\n  \"identificationId\": \"1111111111\",\n  \"email\": \"maria.gonzalez@banco.com\",\n  \"phone\": \"3012345678\",\n  \"address\": \"Calle 50 #10-20, Medellín\",\n  \"birthDate\": \"1992-03-20\",\n  \"systemRole\": \"COMMERCIAL_EMPLOYEE\",\n  \"username\": \"maria_comercial\",\n  \"password\": \"EmployeePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/commercial/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "commercial", "register"]
+            }
+          }
+        },
+        {
+          "name": "4.3 Register Commercial Employee - Name vacío (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"identificationId\": \"1111111111\",\n  \"email\": \"maria.gonzalez@banco.com\",\n  \"phone\": \"3012345678\",\n  \"address\": \"Calle 50 #10-20, Medellín\",\n  \"birthDate\": \"1992-03-20\",\n  \"systemRole\": \"COMMERCIAL_EMPLOYEE\",\n  \"username\": \"maria_comercial\",\n  \"password\": \"EmployeePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/commercial/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "commercial", "register"]
+            }
+          }
+        },
+        {
+          "name": "4.4 Register Commercial Employee - birthDate null (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"María González López\",\n  \"identificationId\": \"1111111111\",\n  \"email\": \"maria.gonzalez@banco.com\",\n  \"phone\": \"3012345678\",\n  \"address\": \"Calle 50 #10-20, Medellín\",\n  \"birthDate\": null,\n  \"systemRole\": \"COMMERCIAL_EMPLOYEE\",\n  \"username\": \"maria_comercial\",\n  \"password\": \"EmployeePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/commercial/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "commercial", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Teller Employees",
+      "description": "Endpoints para cajeros - PROTEGIDOS CON BEARER TOKEN (requiere INTERNAL_ANALYST)",
+      "item": [
+        {
+          "name": "5.1 Register Teller Employee - Caso Feliz (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pedro Martínez Torres\",\n  \"identificationId\": \"2222222222\",\n  \"email\": \"pedro.martinez@banco.com\",\n  \"phone\": \"3023456789\",\n  \"address\": \"Calle 40 #20-30, Cali\",\n  \"birthDate\": \"1995-08-10\",\n  \"username\": \"pedro_cajero\",\n  \"password\": \"TellerPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/teller/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "teller", "register"]
+            }
+          }
+        },
+        {
+          "name": "5.2 Register Teller Employee - Sin Authorization (negativo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pedro Martínez Torres\",\n  \"identificationId\": \"2222222222\",\n  \"email\": \"pedro.martinez@banco.com\",\n  \"phone\": \"3023456789\",\n  \"address\": \"Calle 40 #20-30, Cali\",\n  \"birthDate\": \"1995-08-10\",\n  \"username\": \"pedro_cajero\",\n  \"password\": \"TellerPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/teller/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "teller", "register"]
+            }
+          }
+        },
+        {
+          "name": "5.3 Register Teller Employee - phone vacío (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pedro Martínez Torres\",\n  \"identificationId\": \"2222222222\",\n  \"email\": \"pedro.martinez@banco.com\",\n  \"phone\": \"\",\n  \"address\": \"Calle 40 #20-30, Cali\",\n  \"birthDate\": \"1995-08-10\",\n  \"username\": \"pedro_cajero\",\n  \"password\": \"TellerPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/teller/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "teller", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Corporate Employees",
+      "description": "Endpoints para empleados corporativos - PROTEGIDOS CON BEARER TOKEN (requiere INTERNAL_ANALYST). Nota: incluye campo 'relatedId'",
+      "item": [
+        {
+          "name": "6.1 Register Corporate Employee - Caso Feliz (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Sánchez Díaz\",\n  \"identificationId\": \"3333333333\",\n  \"email\": \"ana.sanchez@banco.com\",\n  \"phone\": \"3034567890\",\n  \"address\": \"Calle 60 #30-40, Barranquilla\",\n  \"birthDate\": \"1988-11-25\",\n  \"relatedId\": \"9876543210\",\n  \"username\": \"ana_corporativa\",\n  \"password\": \"CorporateEmpPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/corporate/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "corporate", "register"]
+            }
+          }
+        },
+        {
+          "name": "6.2 Register Corporate Employee - relatedId vacío (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Sánchez Díaz\",\n  \"identificationId\": \"3333333333\",\n  \"email\": \"ana.sanchez@banco.com\",\n  \"phone\": \"3034567890\",\n  \"address\": \"Calle 60 #30-40, Barranquilla\",\n  \"birthDate\": \"1988-11-25\",\n  \"relatedId\": \"\",\n  \"username\": \"ana_corporativa\",\n  \"password\": \"CorporateEmpPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/corporate/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "corporate", "register"]
+            }
+          }
+        },
+        {
+          "name": "6.3 Register Corporate Employee - address vacío (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Sánchez Díaz\",\n  \"identificationId\": \"3333333333\",\n  \"email\": \"ana.sanchez@banco.com\",\n  \"phone\": \"3034567890\",\n  \"address\": \"\",\n  \"birthDate\": \"1988-11-25\",\n  \"relatedId\": \"9876543210\",\n  \"username\": \"ana_corporativa\",\n  \"password\": \"CorporateEmpPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/corporate/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "corporate", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Corporate Supervisors",
+      "description": "Endpoints para supervisores corporativos - PROTEGIDOS CON BEARER TOKEN (requiere INTERNAL_ANALYST). Nota: incluye campo 'relatedId'",
+      "item": [
+        {
+          "name": "7.1 Register Corporate Supervisor - Caso Feliz (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Roberto Fernández Gómez\",\n  \"identificationId\": \"4444444444\",\n  \"email\": \"roberto.fernandez@banco.com\",\n  \"phone\": \"3045678901\",\n  \"address\": \"Calle 70 #40-50, Cartagena\",\n  \"birthDate\": \"1985-07-12\",\n  \"relatedId\": \"9876543210\",\n  \"username\": \"roberto_supervisor\",\n  \"password\": \"SupervisorPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/supervisor/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "supervisor", "register"]
+            }
+          }
+        },
+        {
+          "name": "7.2 Register Corporate Supervisor - Sin Authorization (negativo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Roberto Fernández Gómez\",\n  \"identificationId\": \"4444444444\",\n  \"email\": \"roberto.fernandez@banco.com\",\n  \"phone\": \"3045678901\",\n  \"address\": \"Calle 70 #40-50, Cartagena\",\n  \"birthDate\": \"1985-07-12\",\n  \"relatedId\": \"9876543210\",\n  \"username\": \"roberto_supervisor\",\n  \"password\": \"SupervisorPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/supervisor/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "supervisor", "register"]
+            }
+          }
+        },
+        {
+          "name": "7.3 Register Corporate Supervisor - email vacío (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Roberto Fernández Gómez\",\n  \"identificationId\": \"4444444444\",\n  \"email\": \"\",\n  \"phone\": \"3045678901\",\n  \"address\": \"Calle 70 #40-50, Cartagena\",\n  \"birthDate\": \"1985-07-12\",\n  \"relatedId\": \"9876543210\",\n  \"username\": \"roberto_supervisor\",\n  \"password\": \"SupervisorPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/supervisor/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "supervisor", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Internal Analysts",
+      "description": "Endpoints para analistas internos - PROTEGIDOS CON BEARER TOKEN (requiere INTERNAL_ANALYST)",
+      "item": [
+        {
+          "name": "8.1 Register Internal Analyst - Caso Feliz (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laura Castillo Ruiz\",\n  \"identificationId\": \"5555555555\",\n  \"email\": \"laura.castillo@banco.com\",\n  \"phone\": \"3056789012\",\n  \"address\": \"Calle 80 #50-60, Bogotá\",\n  \"birthDate\": \"1993-02-28\",\n  \"username\": \"laura_analyst\",\n  \"password\": \"AnalystPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/analyst/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "analyst", "register"]
+            }
+          }
+        },
+        {
+          "name": "8.2 Register Internal Analyst - Sin Authorization (negativo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laura Castillo Ruiz\",\n  \"identificationId\": \"5555555555\",\n  \"email\": \"laura.castillo@banco.com\",\n  \"phone\": \"3056789012\",\n  \"address\": \"Calle 80 #50-60, Bogotá\",\n  \"birthDate\": \"1993-02-28\",\n  \"username\": \"laura_analyst\",\n  \"password\": \"AnalystPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/analyst/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "analyst", "register"]
+            }
+          }
+        },
+        {
+          "name": "8.3 Register Internal Analyst - identificationId vacío (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laura Castillo Ruiz\",\n  \"identificationId\": \"\",\n  \"email\": \"laura.castillo@banco.com\",\n  \"phone\": \"3056789012\",\n  \"address\": \"Calle 80 #50-60, Bogotá\",\n  \"birthDate\": \"1993-02-28\",\n  \"username\": \"laura_analyst\",\n  \"password\": \"AnalystPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/analyst/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "analyst", "register"]
+            }
+          }
+        },
+        {
+          "name": "8.4 Register Internal Analyst - username vacío (con token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laura Castillo Ruiz\",\n  \"identificationId\": \"5555555555\",\n  \"email\": \"laura.castillo@banco.com\",\n  \"phone\": \"3056789012\",\n  \"address\": \"Calle 80 #50-60, Bogotá\",\n  \"birthDate\": \"1993-02-28\",\n  \"username\": \"\",\n  \"password\": \"AnalystPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/analyst/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "analyst", "register"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
