@@ -1,0 +1,5 @@
+# Environment variables — never commit secrets
+.env
+
+# Maven build output
+Banco/target/
