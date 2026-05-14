@@ -1,6 +1,7 @@
 package app.application.usecases;
 
 import app.domain.models.User;
+import app.domain.models.enums.UserStatus;
 import app.domain.ports.IUserPort;
 import app.infrastructure.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +26,10 @@ public class AuthUseCase {
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("Usuario o contraseña inválidos");
+        }
+
+        if (user.getUserStatus() != UserStatus.ACTIVE) {
+            throw new IllegalStateException("Cuenta " + user.getUserStatus() + ". Contacte al administrador.");
         }
 
         return jwtUtil.generateToken(

@@ -1,7 +1,6 @@
 package app.application.adapters.api.request;
 
 import app.domain.models.GeneralBankProduct;
-import app.domain.models.enums.SystemRole;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -39,9 +38,6 @@ public class RegisterCommercialEmployeeRequest {
 
     @NotBlank(message = "La contraseña es obligatoria")
     private String password;
-
-    @NotNull(message = "El rol del sistema es obligatorio")
-    private SystemRole systemRole;
 
     private List<GeneralBankProduct> generalBankProduct;
 }
