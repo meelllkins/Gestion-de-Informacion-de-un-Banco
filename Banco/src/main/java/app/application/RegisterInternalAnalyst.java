@@ -4,6 +4,7 @@ import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IUserPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -13,9 +14,11 @@ import java.time.Period;
 public class RegisterInternalAnalyst {
 
     private final IUserPort userPort;
+    private final PasswordEncoder passwordEncoder;
 
-    public RegisterInternalAnalyst(IUserPort userPort) {
+    public RegisterInternalAnalyst(IUserPort userPort, PasswordEncoder passwordEncoder) {
         this.userPort = userPort;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User register(User analyst, String username, String password) {
@@ -27,7 +30,7 @@ public class RegisterInternalAnalyst {
 
         analyst.setSystemRole(SystemRole.INTERNAL_ANALYST);
         analyst.setUsername(username);
-        analyst.setPassword(password);
+        analyst.setPassword(passwordEncoder.encode(password));
         analyst.setUserStatus(UserStatus.ACTIVE);
 
         userPort.save(analyst);

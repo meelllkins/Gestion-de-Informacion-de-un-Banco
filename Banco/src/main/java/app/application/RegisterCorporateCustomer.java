@@ -5,15 +5,18 @@ import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IUserPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RegisterCorporateCustomer {
 
     private final IUserPort userPort;
+    private final PasswordEncoder passwordEncoder;
 
-    public RegisterCorporateCustomer(IUserPort userPort) {
+    public RegisterCorporateCustomer(IUserPort userPort, PasswordEncoder passwordEncoder) {
         this.userPort = userPort;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public CorporateCustomer register(CorporateCustomer customer,
@@ -77,7 +80,7 @@ public class RegisterCorporateCustomer {
         user.setAddress(customer.getAddress());
         user.setSystemRole(SystemRole.CORPORATE_CUSTOMER);
         user.setUsername(username);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setUserStatus(UserStatus.ACTIVE);
         return user;
     }

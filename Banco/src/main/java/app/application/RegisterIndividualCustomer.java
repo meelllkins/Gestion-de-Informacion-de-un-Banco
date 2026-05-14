@@ -5,6 +5,7 @@ import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IUserPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -14,9 +15,11 @@ import java.time.Period;
 public class RegisterIndividualCustomer {
 
     private final IUserPort userPort;
+    private final PasswordEncoder passwordEncoder;
 
-    public RegisterIndividualCustomer(IUserPort userPort) {
+    public RegisterIndividualCustomer(IUserPort userPort, PasswordEncoder passwordEncoder) {
         this.userPort = userPort;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public IndividualCustomer register(IndividualCustomer customer,
@@ -88,7 +91,7 @@ public class RegisterIndividualCustomer {
         user.setAddress(customer.getAddress());
         user.setSystemRole(SystemRole.INDIVIDUAL_CUSTOMER);
         user.setUsername(username);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setUserStatus(UserStatus.ACTIVE);
         return user;
     }
