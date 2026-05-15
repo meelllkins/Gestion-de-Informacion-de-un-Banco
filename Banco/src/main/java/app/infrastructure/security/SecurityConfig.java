@@ -56,6 +56,8 @@ public class SecurityConfig {
                     // ── Operaciones de empleado corporativo ───────────
                     .requestMatchers(HttpMethod.POST, "/api/employees/corporate/transfer")
                             .hasRole("CORPORATE_EMPLOYEE")
+                    .requestMatchers(HttpMethod.POST, "/api/employees/corporate/bulk-transfer")
+                            .hasRole("CORPORATE_EMPLOYEE")
                     .requestMatchers(HttpMethod.GET, "/api/employees/corporate/my-transfers/**")
                             .hasRole("CORPORATE_EMPLOYEE")
 

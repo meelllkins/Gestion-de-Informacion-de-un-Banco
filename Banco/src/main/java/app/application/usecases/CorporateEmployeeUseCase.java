@@ -40,4 +40,11 @@ public class CorporateEmployeeUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
         return transferService.getTransferHistory(accountNumber, employee);
     }
+
+    public List<Transfer> createBulkTransfer(List<Transfer> transfers,
+                                              String employeeIdentificationId) {
+        User employee = userPort.findByIdentificationId(employeeIdentificationId)
+                .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
+        return transferService.createBulkTransfer(transfers, employee);
+    }
 }
