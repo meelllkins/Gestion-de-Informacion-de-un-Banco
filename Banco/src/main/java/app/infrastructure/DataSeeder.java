@@ -19,7 +19,6 @@ import app.domain.ports.IUserPort;
 import app.domain.services.implementations.OpenAccount;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -63,7 +62,6 @@ public class DataSeeder implements ApplicationRunner {
 	private final OpenAccount openAccount;
 	private final IUserPort userPort;
 	private final IAccountPort accountPort;
-	private final PasswordEncoder passwordEncoder;
 
 	public DataSeeder(InternalAnalystUseCase internalAnalystUseCase,
 					  CorporateCustomerUseCase corporateCustomerUseCase,
@@ -74,8 +72,7 @@ public class DataSeeder implements ApplicationRunner {
 					  IndividualCustomerUseCase individualCustomerUseCase,
 					  OpenAccount openAccount,
 					  IUserPort userPort,
-					  IAccountPort accountPort,
-					  PasswordEncoder passwordEncoder) {
+					  IAccountPort accountPort) {
 		this.internalAnalystUseCase = internalAnalystUseCase;
 		this.corporateCustomerUseCase = corporateCustomerUseCase;
 		this.corporateEmployeeUseCase = corporateEmployeeUseCase;
@@ -86,7 +83,6 @@ public class DataSeeder implements ApplicationRunner {
 		this.openAccount = openAccount;
 		this.userPort = userPort;
 		this.accountPort = accountPort;
-		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
@@ -114,7 +110,7 @@ public class DataSeeder implements ApplicationRunner {
 					return internalAnalystUseCase.register(
 							analyst,
 							ANALYST_USERNAME,
-							passwordEncoder.encode(ANALYST_PASSWORD)
+							ANALYST_PASSWORD
 					);
 				});
 	}
@@ -135,7 +131,7 @@ public class DataSeeder implements ApplicationRunner {
 		corporateCustomerUseCase.register(
 				customer,
 				CORPORATE_USERNAME,
-				passwordEncoder.encode(CORPORATE_PASSWORD)
+				CORPORATE_PASSWORD
 		);
 	}
 
@@ -156,7 +152,7 @@ public class DataSeeder implements ApplicationRunner {
 		corporateEmployeeUseCase.register(
 				employee,
 				CORPORATE_EMPLOYEE_USERNAME,
-				passwordEncoder.encode(CORPORATE_PASSWORD)
+				CORPORATE_PASSWORD
 		);
 	}
 
@@ -177,7 +173,7 @@ public class DataSeeder implements ApplicationRunner {
 		corporateSupervisorUseCase.register(
 				supervisor,
 				CORPORATE_SUPERVISOR_USERNAME,
-				passwordEncoder.encode(CORPORATE_PASSWORD)
+				CORPORATE_PASSWORD
 		);
 	}
 
@@ -194,7 +190,7 @@ public class DataSeeder implements ApplicationRunner {
 					return commercialEmployeeUseCase.register(
 							employee,
 							COMMERCIAL_EMPLOYEE_USERNAME,
-							passwordEncoder.encode(CORPORATE_PASSWORD)
+							CORPORATE_PASSWORD
 					);
 				});
 	}
@@ -212,7 +208,7 @@ public class DataSeeder implements ApplicationRunner {
 					return tellerEmployeeUseCase.register(
 							employee,
 							TELLER_EMPLOYEE_USERNAME,
-							passwordEncoder.encode(CORPORATE_PASSWORD)
+							CORPORATE_PASSWORD
 					);
 				});
 	}
@@ -233,7 +229,7 @@ public class DataSeeder implements ApplicationRunner {
 		individualCustomerUseCase.register(
 				customer,
 				INDIVIDUAL_USERNAME,
-				passwordEncoder.encode(CORPORATE_PASSWORD)
+				CORPORATE_PASSWORD
 		);
 	}
 
