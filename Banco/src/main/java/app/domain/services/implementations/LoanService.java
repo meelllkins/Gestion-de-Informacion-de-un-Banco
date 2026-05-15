@@ -6,6 +6,7 @@ import app.domain.models.User;
 import app.domain.models.enums.LoanStatus;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
+import app.domain.Exceptions.BusinessException;
 import app.domain.ports.IAccountPort;
 import app.domain.ports.ILoanPort;
 import app.domain.ports.IUserPort;
@@ -76,6 +77,11 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan approveLoan(int loanId, double approvedAmount, double interestRate, User analystUser) {
+        if (analystUser.getSystemRole() != SystemRole.INTERNAL_ANALYST) {
+            throw new BusinessException(
+                    "Solo el Analista Interno puede aprobar préstamos.");
+        }
+
         Loan loan = loanPort.findById(loanId)
                 .orElseThrow(() -> new IllegalArgumentException("Préstamo no encontrado: #" + loanId));
 
@@ -112,6 +118,11 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan rejectLoan(int loanId, User analystUser) {
+        if (analystUser.getSystemRole() != SystemRole.INTERNAL_ANALYST) {
+            throw new BusinessException(
+                    "Solo el Analista Interno puede rechazar préstamos.");
+        }
+
         Loan loan = loanPort.findById(loanId)
                 .orElseThrow(() -> new IllegalArgumentException("Préstamo no encontrado: #" + loanId));
 
