@@ -5,6 +5,7 @@ import app.domain.models.Transfer;
 import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.TransferStatus;
+import app.domain.Exceptions.BusinessException;
 import app.domain.ports.IAccountPort;
 import app.domain.ports.ITransferPort;
 import app.domain.services.interfaces.ILogService;
@@ -99,6 +100,11 @@ public class TransferService implements ITransferService {
         BankAccount sourceAccount = getActiveAccount.getActiveAccount(transfer.getSourceAccount());
         if (!sourceAccount.getAccountHolderId().equals(supervisorUser.getRelatedId())) {
             throw new SecurityException("Solo puede aprobar transferencias de su empresa.");
+        }
+
+        if (transfer.getCreatorUserId() == Integer.parseInt(supervisorUser.getIdentificationId())) {
+            throw new BusinessException(
+                    "Un supervisor no puede aprobar transferencias que él mismo creó.");
         }
 
         checkAndExpireTransfers();
