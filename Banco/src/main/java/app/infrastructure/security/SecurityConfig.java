@@ -39,6 +39,44 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/customers/individual/register").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/customers/corporate/register").permitAll()
 
+                    // ── Operaciones de cliente individual ─────────────
+                    .requestMatchers(HttpMethod.POST, "/api/customers/individual/request-loan")
+                            .hasRole("INDIVIDUAL_CUSTOMER")
+                    .requestMatchers(HttpMethod.POST, "/api/customers/individual/transfer")
+                            .hasRole("INDIVIDUAL_CUSTOMER")
+                    .requestMatchers(HttpMethod.GET, "/api/customers/individual/my-accounts")
+                            .hasRole("INDIVIDUAL_CUSTOMER")
+
+                    // ── Operaciones de ventanilla ─────────────────────
+                    .requestMatchers(HttpMethod.POST, "/api/employees/teller/open-account")
+                            .hasRole("TELLER_EMPLOYEE")
+                    .requestMatchers(HttpMethod.GET, "/api/employees/teller/account-balance/**")
+                            .hasRole("TELLER_EMPLOYEE")
+
+                    // ── Operaciones de empleado corporativo ───────────
+                    .requestMatchers(HttpMethod.POST, "/api/employees/corporate/transfer")
+                            .hasRole("CORPORATE_EMPLOYEE")
+                    .requestMatchers(HttpMethod.GET, "/api/employees/corporate/my-transfers/**")
+                            .hasRole("CORPORATE_EMPLOYEE")
+
+                    // ── Operaciones de supervisor corporativo ─────────
+                    .requestMatchers(HttpMethod.GET, "/api/employees/supervisor/pending-transfers")
+                            .hasRole("CORPORATE_SUPERVISOR")
+                    .requestMatchers(HttpMethod.PUT, "/api/employees/supervisor/approve-transfer/**")
+                            .hasRole("CORPORATE_SUPERVISOR")
+                    .requestMatchers(HttpMethod.PUT, "/api/employees/supervisor/reject-transfer/**")
+                            .hasRole("CORPORATE_SUPERVISOR")
+
+                    // ── Operaciones de analista interno ───────────────
+                    .requestMatchers(HttpMethod.GET, "/api/employees/analyst/pending-loans")
+                            .hasRole("INTERNAL_ANALYST")
+                    .requestMatchers(HttpMethod.PUT, "/api/employees/analyst/approve-loan/**")
+                            .hasRole("INTERNAL_ANALYST")
+                    .requestMatchers(HttpMethod.PUT, "/api/employees/analyst/reject-loan/**")
+                            .hasRole("INTERNAL_ANALYST")
+                    .requestMatchers(HttpMethod.POST, "/api/employees/analyst/disburse-loan/**")
+                            .hasRole("INTERNAL_ANALYST")
+
                     // ── Registro de empleados (solo INTERNAL_ANALYST) ─
                     .requestMatchers(HttpMethod.POST, "/api/employees/**")
                             .hasRole("INTERNAL_ANALYST")
