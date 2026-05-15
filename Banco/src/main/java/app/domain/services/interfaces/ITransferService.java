@@ -67,4 +67,12 @@ public interface ITransferService {
      * Retorna el historial de transferencias de un cliente o empresa.
      */
     List<Transfer> getTransferHistory(String accountNumber, User requestingUser);
+
+    /**
+     * Ejecuta un lote de transferencias (nómina/pagos masivos).
+     * Valida la suma total por cuenta origen antes de ejecutar cualquiera.
+     * Si alguna validación falla, ninguna transferencia se procesa.
+     * Solo puede hacerlo: Empleado de Empresa (CORPORATE_EMPLOYEE).
+     */
+    List<Transfer> createBulkTransfer(List<Transfer> transfers, User requestingUser);
 }
