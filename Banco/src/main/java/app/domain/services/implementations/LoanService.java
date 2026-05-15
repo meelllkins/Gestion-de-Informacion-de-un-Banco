@@ -7,6 +7,7 @@ import app.domain.models.enums.LoanStatus;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IAccountPort;
+import app.domain.ports.ILoanPort;
 import app.domain.ports.IUserPort;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ILoanService;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class LoanService implements ILoanService {
@@ -23,16 +23,18 @@ public class LoanService implements ILoanService {
     private final ILogService logService;
     private final GetActiveAccount getActiveAccount;
     private final IAccountPort accountPort;
+    private final ILoanPort loanPort;
 
-    private final List<Loan> loans = new ArrayList<>();
     private int nextLoanId = 1;
 
     public LoanService(IUserPort userPort, ILogService logService,
-                       GetActiveAccount getActiveAccount, IAccountPort accountPort) {
+                       GetActiveAccount getActiveAccount, IAccountPort accountPort,
+                       ILoanPort loanPort) {
         this.userPort = userPort;
         this.logService = logService;
         this.getActiveAccount = getActiveAccount;
         this.accountPort = accountPort;
+        this.loanPort = loanPort;
     }
 
     @Override
@@ -60,7 +62,7 @@ public class LoanService implements ILoanService {
         loan.setLoanStatus(LoanStatus.PENDING);
         loan.setApprovedAmount(0);
         loan.setInterestRate(0);
-        loans.add(loan);
+        loanPort.save(loan);
 
         Map<String, Object> detail = new HashMap<>();
         detail.put("clientId", loan.getApplicantClientId());
@@ -74,7 +76,8 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan approveLoan(int loanId, double approvedAmount, double interestRate, User analystUser) {
-        Loan loan = getLoanById(loanId);
+        Loan loan = loanPort.findById(loanId)
+                .orElseThrow(() -> new IllegalArgumentException("Préstamo no encontrado: #" + loanId));
 
         if (loan.getLoanStatus() != LoanStatus.PENDING) {
             throw new IllegalStateException(
@@ -91,7 +94,10 @@ public class LoanService implements ILoanService {
         loan.setLoanStatus(LoanStatus.APPROVED);
         loan.setApprovedAmount(approvedAmount);
         loan.setInterestRate(interestRate);
-        loan.setApprovalDate(LocalDate.now());
+        LocalDate approvalDate = LocalDate.now();
+        loan.setApprovalDate(approvalDate);
+        loanPort.updateApprovalData(loanId, approvedAmount, interestRate);
+        loanPort.updateStatus(loanId, LoanStatus.APPROVED, approvalDate);
 
         Map<String, Object> detail = new HashMap<>();
         detail.put("previousStatus", previousStatus.toString());
@@ -106,7 +112,8 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan rejectLoan(int loanId, User analystUser) {
-        Loan loan = getLoanById(loanId);
+        Loan loan = loanPort.findById(loanId)
+                .orElseThrow(() -> new IllegalArgumentException("Préstamo no encontrado: #" + loanId));
 
         if (loan.getLoanStatus() != LoanStatus.PENDING) {
             throw new IllegalStateException(
@@ -115,6 +122,7 @@ public class LoanService implements ILoanService {
 
         LoanStatus previousStatus = loan.getLoanStatus();
         loan.setLoanStatus(LoanStatus.REJECTED);
+        loanPort.updateStatus(loanId, LoanStatus.REJECTED, LocalDate.now());
 
         Map<String, Object> detail = new HashMap<>();
         detail.put("previousStatus", previousStatus.toString());
@@ -127,7 +135,8 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan disburseLoan(int loanId, User analystUser) {
-        Loan loan = getLoanById(loanId);
+        Loan loan = loanPort.findById(loanId)
+                .orElseThrow(() -> new IllegalArgumentException("Préstamo no encontrado: #" + loanId));
 
         if (loan.getLoanStatus() != LoanStatus.APPROVED) {
             throw new IllegalStateException(
@@ -150,7 +159,10 @@ public class LoanService implements ILoanService {
         accountPort.updateBalance(loan.getDestinationAccount(), newBalance);
 
         loan.setLoanStatus(LoanStatus.DISBURSED);
-        loan.setDisbursementDate(LocalDate.now());
+        LocalDate disbursementDate = LocalDate.now();
+        loan.setDisbursementDate(disbursementDate);
+        loanPort.updateDestinationAccount(loanId, loan.getDestinationAccount());
+        loanPort.updateStatus(loanId, LoanStatus.DISBURSED, disbursementDate);
 
         Map<String, Object> detail = new HashMap<>();
         detail.put("previousStatus", LoanStatus.APPROVED.toString());
@@ -167,7 +179,8 @@ public class LoanService implements ILoanService {
 
     @Override
     public Loan findById(int loanId, User requestingUser) {
-        Loan loan = getLoanById(loanId);
+        Loan loan = loanPort.findById(loanId)
+                .orElseThrow(() -> new IllegalArgumentException("Préstamo no encontrado: #" + loanId));
 
         SystemRole role = requestingUser.getSystemRole();
         if (role == SystemRole.INDIVIDUAL_CUSTOMER || role == SystemRole.CORPORATE_CUSTOMER) {
@@ -186,22 +199,11 @@ public class LoanService implements ILoanService {
                 throw new SecurityException("No tiene permiso para ver préstamos de otro cliente.");
             }
         }
-        return loans.stream()
-                .filter(l -> l.getApplicantClientId().equals(clientId))
-                .collect(Collectors.toList());
+        return loanPort.findByClientId(clientId);
     }
 
     @Override
     public List<Loan> getPendingLoans(User analystUser) {
-        return loans.stream()
-                .filter(l -> l.getLoanStatus() == LoanStatus.PENDING)
-                .collect(Collectors.toList());
-    }
-
-    private Loan getLoanById(int loanId) {
-        return loans.stream()
-                .filter(l -> l.getLoanId() == loanId)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Préstamo no encontrado: #" + loanId));
+        return loanPort.findByStatus(LoanStatus.PENDING);
     }
 }

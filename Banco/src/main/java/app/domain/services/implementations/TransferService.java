@@ -6,31 +6,33 @@ import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.TransferStatus;
 import app.domain.ports.IAccountPort;
+import app.domain.ports.ITransferPort;
 import app.domain.services.interfaces.ILogService;
 import app.domain.services.interfaces.ITransferService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class TransferService implements ITransferService {
 
-    private final List<Transfer> transfers = new ArrayList<>();
     private final ILogService logService;
     private final GetActiveAccount getActiveAccount;
     private final IAccountPort accountPort;
+    private final ITransferPort transferPort;
 
     private int nextTransferId = 1;
 
     public TransferService(ILogService logService,
                            GetActiveAccount getActiveAccount,
-                           IAccountPort accountPort) {
+                           IAccountPort accountPort,
+                           ITransferPort transferPort) {
         this.logService = logService;
         this.getActiveAccount = getActiveAccount;
         this.accountPort = accountPort;
+        this.transferPort = transferPort;
     }
 
     @Override
@@ -62,8 +64,8 @@ public class TransferService implements ITransferService {
                 && transfer.getAmount() > HIGH_AMOUNT_THRESHOLD;
 
         if (requiresApproval) {
-            transfer.setTransferStatus(TransferStatus.PENDING);
-            transfers.add(transfer);
+            transfer.setTransferStatus(TransferStatus.WAITING_APPROVAL);
+            transferPort.save(transfer);
 
             Map<String, Object> detail = new HashMap<>();
             detail.put("amount", transfer.getAmount());
@@ -73,10 +75,11 @@ public class TransferService implements ITransferService {
             logService.log("TRANSFER_PENDING", requestingUser,
                     String.valueOf(transfer.getTransferId()), detail);
 
-            System.out.printf("Transferencia #%d creada. Monto %.2f supera umbral → PENDING%n",
+            System.out.printf("Transferencia #%d creada. Monto %.2f supera umbral → WAITING_APPROVAL%n",
                     transfer.getTransferId(), transfer.getAmount());
         } else {
             executeTransfer(transfer, sourceAccount, requestingUser);
+            transferPort.save(transfer);
         }
 
         return transfer;
@@ -84,11 +87,12 @@ public class TransferService implements ITransferService {
 
     @Override
     public Transfer approveTransfer(int transferId, User supervisorUser) {
-        Transfer transfer = getTransferById(transferId);
+        Transfer transfer = transferPort.findById(transferId)
+                .orElseThrow(() -> new IllegalArgumentException("Transferencia no encontrada: #" + transferId));
 
-        if (transfer.getTransferStatus() != TransferStatus.PENDING) {
+        if (transfer.getTransferStatus() != TransferStatus.WAITING_APPROVAL) {
             throw new IllegalStateException(
-                "Solo se pueden aprobar transferencias en estado PENDING. Estado actual: "
+                "Solo se pueden aprobar transferencias en estado WAITING_APPROVAL. Estado actual: "
                 + transfer.getTransferStatus());
         }
 
@@ -98,14 +102,18 @@ public class TransferService implements ITransferService {
         }
 
         checkAndExpireTransfers();
-        transfer = getTransferById(transferId);
+        transfer = transferPort.findById(transferId)
+                .orElseThrow(() -> new IllegalArgumentException("Transferencia no encontrada: #" + transferId));
         if (transfer.getTransferStatus() == TransferStatus.EXPIRED) {
             throw new IllegalStateException("La transferencia #" + transferId + " ya venció.");
         }
 
         executeTransfer(transfer, sourceAccount, supervisorUser);
-        transfer.setApprovalDate(LocalDateTime.now());
+        LocalDateTime approvalDate = LocalDateTime.now();
+        transfer.setApprovalDate(approvalDate);
         transfer.setApproverUserId(Integer.parseInt(supervisorUser.getIdentificationId()));
+        transferPort.updateStatus(transferId, TransferStatus.EXECUTED,
+                approvalDate, transfer.getApproverUserId());
 
         System.out.println("Transferencia #" + transferId + " APROBADA y EJECUTADA.");
         return transfer;
@@ -113,16 +121,20 @@ public class TransferService implements ITransferService {
 
     @Override
     public Transfer rejectTransfer(int transferId, User supervisorUser) {
-        Transfer transfer = getTransferById(transferId);
+        Transfer transfer = transferPort.findById(transferId)
+                .orElseThrow(() -> new IllegalArgumentException("Transferencia no encontrada: #" + transferId));
 
-        if (transfer.getTransferStatus() != TransferStatus.PENDING) {
+        if (transfer.getTransferStatus() != TransferStatus.WAITING_APPROVAL) {
             throw new IllegalStateException(
-                "Solo se pueden rechazar transferencias en estado PENDING.");
+                "Solo se pueden rechazar transferencias en estado WAITING_APPROVAL.");
         }
 
         transfer.setTransferStatus(TransferStatus.REJECTED);
-        transfer.setApprovalDate(LocalDateTime.now());
+        LocalDateTime rejectionDate = LocalDateTime.now();
+        transfer.setApprovalDate(rejectionDate);
         transfer.setApproverUserId(Integer.parseInt(supervisorUser.getIdentificationId()));
+        transferPort.updateStatus(transferId, TransferStatus.REJECTED,
+                rejectionDate, transfer.getApproverUserId());
 
         Map<String, Object> detail = new HashMap<>();
         detail.put("amount", transfer.getAmount());
@@ -138,11 +150,10 @@ public class TransferService implements ITransferService {
     public void checkAndExpireTransfers() {
         LocalDateTime now = LocalDateTime.now();
 
-        transfers.stream()
-                .filter(t -> t.getTransferStatus() == TransferStatus.PENDING)
-                .filter(t -> ChronoUnit.MINUTES.between(t.getCreationDate(), now) >= 60)
+        transferPort.findWaitingApprovalBefore(now.minusMinutes(60))
                 .forEach(t -> {
                     t.setTransferStatus(TransferStatus.EXPIRED);
+                    transferPort.updateStatus(t.getTransferId(), TransferStatus.EXPIRED, now, null);
 
                     Map<String, Object> detail = new HashMap<>();
                     detail.put("reason", "Vencida por falta de aprobación en el tiempo establecido");
@@ -165,7 +176,8 @@ public class TransferService implements ITransferService {
     @Override
     public Transfer findById(int transferId, User requestingUser) {
         checkAndExpireTransfers();
-        Transfer transfer = getTransferById(transferId);
+        Transfer transfer = transferPort.findById(transferId)
+                .orElseThrow(() -> new IllegalArgumentException("Transferencia no encontrada: #" + transferId));
         validateTransferVisibility(transfer, requestingUser);
         return transfer;
     }
@@ -174,8 +186,7 @@ public class TransferService implements ITransferService {
     public List<Transfer> getPendingApprovalTransfers(User requestingUser) {
         checkAndExpireTransfers();
 
-        return transfers.stream()
-                .filter(t -> t.getTransferStatus() == TransferStatus.PENDING)
+        return transferPort.findByStatus(TransferStatus.WAITING_APPROVAL).stream()
                 .filter(t -> {
                     if (requestingUser.getSystemRole() == SystemRole.CORPORATE_SUPERVISOR) {
                         try {
@@ -202,10 +213,7 @@ public class TransferService implements ITransferService {
             }
         }
 
-        return transfers.stream()
-                .filter(t -> t.getSourceAccount().equals(accountNumber)
-                          || t.getDestinationAccount().equals(accountNumber))
-                .collect(Collectors.toList());
+        return transferPort.findByAccount(accountNumber);
     }
 
     // ──────────────────────────────────────────────
@@ -236,7 +244,6 @@ public class TransferService implements ITransferService {
         }
 
         transfer.setTransferStatus(TransferStatus.EXECUTED);
-        transfers.add(transfer);
 
         Map<String, Object> detail = new HashMap<>();
         detail.put("amount", transfer.getAmount());
@@ -252,14 +259,6 @@ public class TransferService implements ITransferService {
         System.out.printf("Transferencia #%d EJECUTADA. %.2f de %s → %s%n",
                 transfer.getTransferId(), transfer.getAmount(),
                 transfer.getSourceAccount(), transfer.getDestinationAccount());
-    }
-
-    private Transfer getTransferById(int transferId) {
-        return transfers.stream()
-                .filter(t -> t.getTransferId() == transferId)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Transferencia no encontrada: #" + transferId));
     }
 
     private void validateTransferVisibility(Transfer transfer, User requestingUser) {
