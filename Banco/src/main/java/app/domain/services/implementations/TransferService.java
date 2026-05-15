@@ -143,6 +143,8 @@ public class TransferService implements ITransferService {
                 rejectionDate, transfer.getApproverUserId());
 
         Map<String, Object> detail = new HashMap<>();
+        detail.put("previousStatus", TransferStatus.WAITING_APPROVAL.toString());
+        detail.put("newStatus", TransferStatus.REJECTED.toString());
         detail.put("amount", transfer.getAmount());
         detail.put("sourceAccount", transfer.getSourceAccount());
         detail.put("supervisorId", supervisorUser.getIdentificationId());
@@ -162,6 +164,8 @@ public class TransferService implements ITransferService {
                     transferPort.updateStatus(t.getTransferId(), TransferStatus.EXPIRED, now, null);
 
                     Map<String, Object> detail = new HashMap<>();
+                    detail.put("previousStatus", TransferStatus.WAITING_APPROVAL.toString());
+                    detail.put("newStatus", TransferStatus.EXPIRED.toString());
                     detail.put("reason", "Vencida por falta de aprobación en el tiempo establecido");
                     detail.put("expirationDateTime", now.toString());
                     detail.put("creatorUserId", t.getCreatorUserId());
@@ -249,9 +253,12 @@ public class TransferService implements ITransferService {
                     + transfer.getDestinationAccount());
         }
 
+        TransferStatus previousStatus = transfer.getTransferStatus();
         transfer.setTransferStatus(TransferStatus.EXECUTED);
 
         Map<String, Object> detail = new HashMap<>();
+        detail.put("previousStatus", previousStatus != null ? previousStatus.toString() : "NEW");
+        detail.put("newStatus", TransferStatus.EXECUTED.toString());
         detail.put("amount", transfer.getAmount());
         detail.put("sourceAccount", transfer.getSourceAccount());
         detail.put("destinationAccount", transfer.getDestinationAccount());
