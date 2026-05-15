@@ -1,5 +1,6 @@
 package app.application.adapters.api.controllers;
 
+import app.application.adapters.api.request.BulkTransferRequest;
 import app.application.adapters.api.request.CreateTransferRequest;
 import app.application.adapters.api.request.RegisterCorporateEmployeeRequest;
 import app.application.adapters.api.response.RegisterCorporateEmployeeResponse;
@@ -72,6 +73,32 @@ public class CorporateEmployeeController {
         Transfer created = corporateEmployeeUseCase.createTransfer(transfer, employeeId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toTransferResponse(created));
+    }
+
+    @PostMapping("/bulk-transfer")
+    public ResponseEntity<List<TransferResponse>> createBulkTransfer(
+            @Valid @RequestBody BulkTransferRequest request) {
+
+        String employeeId = (String) SecurityContextHolder.getContext()
+                .getAuthentication().getDetails();
+
+        List<Transfer> transfers = request.getTransfers().stream()
+                .map(r -> {
+                    Transfer t = new Transfer();
+                    t.setSourceAccount(r.getSourceAccount());
+                    t.setDestinationAccount(r.getDestinationAccount());
+                    t.setAmount(r.getAmount());
+                    return t;
+                })
+                .collect(Collectors.toList());
+
+        List<TransferResponse> response = corporateEmployeeUseCase
+                .createBulkTransfer(transfers, employeeId)
+                .stream()
+                .map(this::toTransferResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/my-transfers/{accountNumber}")

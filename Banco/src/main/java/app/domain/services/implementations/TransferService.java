@@ -226,6 +226,57 @@ public class TransferService implements ITransferService {
         return transferPort.findByAccount(accountNumber);
     }
 
+    @Override
+    public List<Transfer> createBulkTransfer(List<Transfer> transfers, User requestingUser) {
+        if (transfers == null || transfers.isEmpty()) {
+            throw new IllegalArgumentException("La lista de transferencias no puede estar vacía.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        int creatorId = Integer.parseInt(requestingUser.getIdentificationId());
+
+        // PRE-FLIGHT: valida montos, pertenencia de cuentas y saldo acumulado
+        // sin tocar la base de datos hasta que todo sea válido
+        Map<String, Double> runningBalance = new HashMap<>();
+        for (Transfer t : transfers) {
+            if (t.getAmount() <= 0) {
+                throw new IllegalArgumentException(
+                        "Todos los montos deben ser mayores a cero.");
+            }
+            String src = t.getSourceAccount();
+            if (!runningBalance.containsKey(src)) {
+                BankAccount account = getActiveAccount.getActiveAccount(src);
+                if (!account.getAccountHolderId().equals(requestingUser.getRelatedId())) {
+                    throw new SecurityException(
+                            "Solo puede operar cuentas de su empresa: " + src);
+                }
+                runningBalance.put(src, account.getBalance());
+            }
+            double available = runningBalance.get(src);
+            if (available < t.getAmount()) {
+                throw new BusinessException(
+                        "Saldo insuficiente en " + src + " para cubrir la nómina completa. " +
+                        "Disponible acumulado: " + available +
+                        ", solicitado en este pago: " + t.getAmount());
+            }
+            runningBalance.put(src, available - t.getAmount());
+        }
+
+        // EJECUCIÓN: todas las validaciones pasaron; ejecuta y persiste en lote
+        List<Transfer> processed = new ArrayList<>();
+        for (Transfer t : transfers) {
+            t.setTransferId(nextTransferId++);
+            t.setCreationDate(now);
+            t.setCreatorUserId(creatorId);
+            BankAccount freshSource = getActiveAccount.getActiveAccount(t.getSourceAccount());
+            executeTransfer(t, freshSource, requestingUser);
+            processed.add(t);
+        }
+
+        transferPort.saveAll(processed);
+        return processed;
+    }
+
     // ──────────────────────────────────────────────
     // Métodos privados
     // ──────────────────────────────────────────────
