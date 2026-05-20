@@ -50,6 +50,10 @@ public class SecurityConfig {
                     // ── Operaciones de ventanilla ─────────────────────
                     .requestMatchers(HttpMethod.POST, "/api/employees/teller/open-account")
                             .hasRole("TELLER_EMPLOYEE")
+                    .requestMatchers(HttpMethod.POST, "/api/employees/teller/deposit")
+                            .hasRole("TELLER_EMPLOYEE")
+                    .requestMatchers(HttpMethod.POST, "/api/employees/teller/withdraw")
+                            .hasRole("TELLER_EMPLOYEE")
                     .requestMatchers(HttpMethod.GET, "/api/employees/teller/account-balance/**")
                             .hasRole("TELLER_EMPLOYEE")
 
