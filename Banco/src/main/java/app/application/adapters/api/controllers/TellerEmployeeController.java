@@ -1,5 +1,6 @@
 package app.application.adapters.api.controllers;
 
+import app.application.adapters.api.request.DepositWithdrawRequest;
 import app.application.adapters.api.request.OpenAccountRequest;
 import app.application.adapters.api.request.RegisterTellerEmployeeRequest;
 import app.application.adapters.api.response.AccountSummaryResponse;
@@ -83,6 +84,22 @@ public class TellerEmployeeController {
                 opened.getOpeningDate(), opened.getProductCode(),
                 opened.getProductName(), opened.getCategory()
         ));
+    }
+
+    @PostMapping("/deposit")
+    public ResponseEntity<Void> deposit(@Valid @RequestBody DepositWithdrawRequest request) {
+        String tellerId = (String) SecurityContextHolder.getContext()
+                .getAuthentication().getDetails();
+        tellerEmployeeUseCase.deposit(request.getAccountNumber(), request.getAmount(), tellerId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<Void> withdraw(@Valid @RequestBody DepositWithdrawRequest request) {
+        String tellerId = (String) SecurityContextHolder.getContext()
+                .getAuthentication().getDetails();
+        tellerEmployeeUseCase.withdraw(request.getAccountNumber(), request.getAmount(), tellerId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/account-balance/{identificationId}")
