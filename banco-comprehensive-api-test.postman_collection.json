@@ -1,0 +1,875 @@
+{
+  "info": {
+    "name": "Banco - Comprehensive API Test Suite",
+    "description": "Colección exhaustiva para validar todos los endpoints del sistema bancario. Incluye:\n\n📋 SECCIONES:\n1. Authentication - Login para todos los roles\n2. Individual Customers - Registro, préstamo, transferencia\n3. Corporate Customers - Registro\n4. Commercial Employees - Registro (requiere Auth)\n5. Teller Employees - Registro, cuentas, depósito/retiro\n6. Corporate Employees - Registro, transferencias, masivas\n7. Corporate Supervisors - Aprobar/rechazar transferencias\n8. Internal Analysts - Aprobar/rechazar/disbursar préstamos\n9. Validaciones - Edge cases y restricciones de seguridad\n\n✅ Casos felices y ❌ Casos negativos incluidos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "analyst_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supervisor_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teller_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "corporate_employee_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "individual_customer_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transfer_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "loan_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1️⃣ AUTHENTICATION",
+      "description": "Endpoints de autenticación y login para todos los roles",
+      "item": [
+        {
+          "name": "1.1 ✅ Login - Internal Analyst (SUCCESS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('analyst_token', jsonData.token);",
+                  "    console.log('✅ Analyst Token guardado:', jsonData.token.substring(0, 20) + '...');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"analyst_user\",\n  \"password\": \"analyst_password\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "1.2 ❌ Login - Username vacío",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"\",\n  \"password\": \"analyst_password\"\n}"},
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "1.3 ❌ Login - Password vacío",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"analyst_user\",\n  \"password\": \"\"\n}"},
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "1.4 ❌ Login - Usuario no existe",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"usuario_inexistente\",\n  \"password\": \"cualquier_password\"\n}"},
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2️⃣ INDIVIDUAL CUSTOMERS",
+      "description": "Gestión de clientes individuales: registro, préstamos, transferencias",
+      "item": [
+        {
+          "name": "2.1 ✅ Register - Cliente Individual (SUCCESS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('✅ Cliente Individual registrado exitosamente');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez García\",\n  \"identificationId\": \"12345678A\",\n  \"email\": \"juan.perez@email.com\",\n  \"phone\": \"+34912345678\",\n  \"birthDate\": \"1990-05-15\",\n  \"address\": \"Calle Principal 123, Madrid\",\n  \"username\": \"juan.perez\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/register", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "register"]}
+          }
+        },
+        {
+          "name": "2.2 ❌ Register - Nombre vacío",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"identificationId\": \"12345679A\",\n  \"email\": \"cliente@email.com\",\n  \"phone\": \"+34912345679\",\n  \"birthDate\": \"1992-03-20\",\n  \"address\": \"Calle 456, Madrid\",\n  \"username\": \"cliente_ind\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/register", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "register"]}
+          }
+        },
+        {
+          "name": "2.3 ❌ Register - Email inválido",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Carlos López\",\n  \"identificationId\": \"98765432B\",\n  \"email\": \"email_invalido\",\n  \"phone\": \"+34912345680\",\n  \"birthDate\": \"1988-07-10\",\n  \"address\": \"Avenida Central 789\",\n  \"username\": \"carlos.lopez\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/register", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "register"]}
+          }
+        },
+        {
+          "name": "2.4 ❌ Register - BirthDate null",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"María Rodríguez\",\n  \"identificationId\": \"11111111C\",\n  \"email\": \"maria@email.com\",\n  \"phone\": \"+34912345681\",\n  \"birthDate\": null,\n  \"address\": \"Plaza Mayor 321\",\n  \"username\": \"maria.rodriguez\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/register", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "register"]}
+          }
+        },
+        {
+          "name": "2.5 ✅ Request Loan - Cliente Individual (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{individual_customer_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanType\": \"PERSONAL\",\n  \"requestedAmount\": 5000,\n  \"termMonths\": 24,\n  \"productCode\": \"PRSTM001\",\n  \"productName\": \"Préstamo Personal\",\n  \"category\": \"PERSONAL\",\n  \"destinationAccount\": \"ES1234567890123456789012\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/request-loan", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "request-loan"]}
+          }
+        },
+        {
+          "name": "2.6 ✅ Create Transfer - Cliente Individual (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{individual_customer_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccount\": \"ES1111111111111111111111\",\n  \"destinationAccount\": \"ES2222222222222222222222\",\n  \"amount\": 1500\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/transfer", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "transfer"]}
+          }
+        },
+        {
+          "name": "2.7 ✅ Get My Accounts - Cliente Individual (SUCCESS)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{individual_customer_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/customers/individual/my-accounts", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "my-accounts"]}
+          }
+        },
+        {
+          "name": "2.8 ❌ Request Loan - Sin token (FORBIDDEN)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanType\": \"PERSONAL\",\n  \"requestedAmount\": 3000,\n  \"termMonths\": 12,\n  \"productCode\": \"PRSTM001\",\n  \"productName\": \"Préstamo Personal\",\n  \"category\": \"PERSONAL\",\n  \"destinationAccount\": \"ES1234567890123456789012\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/request-loan", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "request-loan"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3️⃣ CORPORATE CUSTOMERS",
+      "description": "Gestión de clientes corporativos",
+      "item": [
+        {
+          "name": "3.1 ✅ Register - Cliente Corporativo (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"TechCorp España S.L.\",\n  \"identificationId\": \"A12345678\",\n  \"email\": \"info@techcorp.es\",\n  \"phone\": \"+34932345678\",\n  \"address\": \"Calle Empresarial 456, Barcelona\",\n  \"legalRepresentative\": \"Roberto García Martínez\",\n  \"username\": \"techcorp.admin\",\n  \"password\": \"CorpPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/corporate/register", "host": ["{{base_url}}"], "path": ["api", "customers", "corporate", "register"]}
+          }
+        },
+        {
+          "name": "3.2 ❌ Register - BusinessName vacío",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"\",\n  \"identificationId\": \"B98765432\",\n  \"email\": \"empresa@email.com\",\n  \"phone\": \"+34932345679\",\n  \"address\": \"Calle Corporativa 789\",\n  \"legalRepresentative\": \"Juan Empresario\",\n  \"username\": \"empresa.user\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/corporate/register", "host": ["{{base_url}}"], "path": ["api", "customers", "corporate", "register"]}
+          }
+        },
+        {
+          "name": "3.3 ❌ Register - LegalRepresentative vacío",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"IndustriaXYZ\",\n  \"identificationId\": \"C11111111\",\n  \"email\": \"industria@email.com\",\n  \"phone\": \"+34932345680\",\n  \"address\": \"Zona Industrial 123\",\n  \"legalRepresentative\": \"\",\n  \"username\": \"industria.user\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/corporate/register", "host": ["{{base_url}}"], "path": ["api", "customers", "corporate", "register"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "4️⃣ COMMERCIAL EMPLOYEES",
+      "description": "Registro de empleados comerciales (requiere token válido)",
+      "item": [
+        {
+          "name": "4.1 ✅ Register - Empleado Comercial (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pedro González Sánchez\",\n  \"identificationId\": \"45678901D\",\n  \"email\": \"pedro.gonzalez@banco.es\",\n  \"phone\": \"+34912345682\",\n  \"address\": \"Av. Bancaria 100, Madrid\",\n  \"birthDate\": \"1995-02-14\",\n  \"username\": \"pedro.comercial\",\n  \"password\": \"BankPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/commercial/register", "host": ["{{base_url}}"], "path": ["api", "employees", "commercial", "register"]}
+          }
+        },
+        {
+          "name": "4.2 ❌ Register - Sin Authorization (FORBIDDEN)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Martínez López\",\n  \"identificationId\": \"56789012E\",\n  \"email\": \"ana.martinez@banco.es\",\n  \"phone\": \"+34912345683\",\n  \"address\": \"Calle Profesional 200, Madrid\",\n  \"birthDate\": \"1992-08-22\",\n  \"username\": \"ana.comercial\",\n  \"password\": \"BankPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/commercial/register", "host": ["{{base_url}}"], "path": ["api", "employees", "commercial", "register"]}
+          }
+        },
+        {
+          "name": "4.3 ❌ Register - Nombre vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"identificationId\": \"67890123F\",\n  \"email\": \"comercial@banco.es\",\n  \"phone\": \"+34912345684\",\n  \"address\": \"Calle Test 300\",\n  \"birthDate\": \"1993-06-10\",\n  \"username\": \"comercial.test\",\n  \"password\": \"BankPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/commercial/register", "host": ["{{base_url}}"], "path": ["api", "employees", "commercial", "register"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "5️⃣ TELLER EMPLOYEES",
+      "description": "Empleados de caja: registro, apertura de cuentas, depósitos/retiros",
+      "item": [
+        {
+          "name": "5.1 ✅ Register - Empleado de Caja (SUCCESS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('✅ Teller registrado exitosamente');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Isabel Rodríguez García\",\n  \"identificationId\": \"78901234G\",\n  \"email\": \"isabel.teller@banco.es\",\n  \"phone\": \"+34912345685\",\n  \"address\": \"Paseo Central 50, Madrid\",\n  \"birthDate\": \"1994-09-18\",\n  \"username\": \"isabel.teller\",\n  \"password\": \"TellerPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/teller/register", "host": ["{{base_url}}"], "path": ["api", "employees", "teller", "register"]}
+          }
+        },
+        {
+          "name": "5.2 ❌ Register - Sin Authorization",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Luis Fernández Torres\",\n  \"identificationId\": \"89012345H\",\n  \"email\": \"luis.teller@banco.es\",\n  \"phone\": \"+34912345686\",\n  \"address\": \"Calle Moneda 75\",\n  \"birthDate\": \"1996-04-05\",\n  \"username\": \"luis.teller\",\n  \"password\": \"TellerPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/teller/register", "host": ["{{base_url}}"], "path": ["api", "employees", "teller", "register"]}
+          }
+        },
+        {
+          "name": "5.3 ✅ Open Account (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{teller_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNumber\": \"ES5555555555555555555555\",\n  \"accountType\": \"SAVINGS\",\n  \"accountHolderId\": \"12345678A\",\n  \"balance\": 10000,\n  \"currency\": \"EUR\",\n  \"productCode\": \"ACC001\",\n  \"productName\": \"Cuenta de Ahorro Premium\",\n  \"category\": \"PERSONAL\",\n  \"requiresApproval\": false\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/teller/open-account", "host": ["{{base_url}}"], "path": ["api", "employees", "teller", "open-account"]}
+          }
+        },
+        {
+          "name": "5.4 ✅ Deposit - Depósito en Cuenta (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{teller_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNumber\": \"ES5555555555555555555555\",\n  \"amount\": 2500\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/teller/deposit", "host": ["{{base_url}}"], "path": ["api", "employees", "teller", "deposit"]}
+          }
+        },
+        {
+          "name": "5.5 ✅ Withdraw - Retiro de Cuenta (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{teller_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNumber\": \"ES5555555555555555555555\",\n  \"amount\": 1000\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/teller/withdraw", "host": ["{{base_url}}"], "path": ["api", "employees", "teller", "withdraw"]}
+          }
+        },
+        {
+          "name": "5.6 ✅ Get Account Balance (SUCCESS)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{teller_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/teller/account-balance/12345678A", "host": ["{{base_url}}"], "path": ["api", "employees", "teller", "account-balance", "12345678A"]}
+          }
+        },
+        {
+          "name": "5.7 ❌ Deposit - Monto negativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{teller_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNumber\": \"ES5555555555555555555555\",\n  \"amount\": -500\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/teller/deposit", "host": ["{{base_url}}"], "path": ["api", "employees", "teller", "deposit"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "6️⃣ CORPORATE EMPLOYEES",
+      "description": "Empleados corporativos: transferencias, transferencias masivas",
+      "item": [
+        {
+          "name": "6.1 ✅ Register - Empleado Corporativo (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fernando Sanz López\",\n  \"identificationId\": \"90123456I\",\n  \"email\": \"fernando.corp@banco.es\",\n  \"phone\": \"+34912345687\",\n  \"address\": \"Avenida Corporativa 150, Madrid\",\n  \"birthDate\": \"1991-11-30\",\n  \"relatedId\": \"CORP001\",\n  \"username\": \"fernando.corp\",\n  \"password\": \"CorpEmpPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/corporate/register", "host": ["{{base_url}}"], "path": ["api", "employees", "corporate", "register"]}
+          }
+        },
+        {
+          "name": "6.2 ✅ Create Transfer - Transferencia (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{corporate_employee_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccount\": \"ES3333333333333333333333\",\n  \"destinationAccount\": \"ES4444444444444444444444\",\n  \"amount\": 25000\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/corporate/transfer", "host": ["{{base_url}}"], "path": ["api", "employees", "corporate", "transfer"]}
+          }
+        },
+        {
+          "name": "6.3 ✅ Bulk Transfer - Transferencias Masivas (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{corporate_employee_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transfers\": [\n    {\n      \"sourceAccount\": \"ES3333333333333333333333\",\n      \"destinationAccount\": \"ES4444444444444444444444\",\n      \"amount\": 5000\n    },\n    {\n      \"sourceAccount\": \"ES3333333333333333333333\",\n      \"destinationAccount\": \"ES6666666666666666666666\",\n      \"amount\": 7500\n    },\n    {\n      \"sourceAccount\": \"ES3333333333333333333333\",\n      \"destinationAccount\": \"ES7777777777777777777777\",\n      \"amount\": 3000\n    }\n  ]\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/corporate/bulk-transfer", "host": ["{{base_url}}"], "path": ["api", "employees", "corporate", "bulk-transfer"]}
+          }
+        },
+        {
+          "name": "6.4 ✅ Get My Transfers - Historial de Transferencias (SUCCESS)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{corporate_employee_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/corporate/my-transfers/ES3333333333333333333333", "host": ["{{base_url}}"], "path": ["api", "employees", "corporate", "my-transfers", "ES3333333333333333333333"]}
+          }
+        },
+        {
+          "name": "6.5 ❌ Create Transfer - Sin token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccount\": \"ES3333333333333333333333\",\n  \"destinationAccount\": \"ES4444444444444444444444\",\n  \"amount\": 5000\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/corporate/transfer", "host": ["{{base_url}}"], "path": ["api", "employees", "corporate", "transfer"]}
+          }
+        },
+        {
+          "name": "6.6 ❌ Create Transfer - Monto cero",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{corporate_employee_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccount\": \"ES3333333333333333333333\",\n  \"destinationAccount\": \"ES4444444444444444444444\",\n  \"amount\": 0\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/corporate/transfer", "host": ["{{base_url}}"], "path": ["api", "employees", "corporate", "transfer"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "7️⃣ CORPORATE SUPERVISORS",
+      "description": "Supervisores corporativos: aprobar/rechazar transferencias",
+      "item": [
+        {
+          "name": "7.1 ✅ Register - Supervisor Corporativo (SUCCESS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('supervisor_token', 'token_from_login');",
+                  "    console.log('✅ Supervisor registrado exitosamente');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Victoria Hernández Ruiz\",\n  \"identificationId\": \"01234567J\",\n  \"email\": \"victoria.supervisor@banco.es\",\n  \"phone\": \"+34912345688\",\n  \"address\": \"Calle de Supervisores 200, Madrid\",\n  \"birthDate\": \"1988-03-25\",\n  \"relatedId\": \"CORP001\",\n  \"username\": \"victoria.supervisor\",\n  \"password\": \"SupervisorPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/supervisor/register", "host": ["{{base_url}}"], "path": ["api", "employees", "supervisor", "register"]}
+          }
+        },
+        {
+          "name": "7.2 ✅ Get Pending Transfers (SUCCESS)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{supervisor_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/supervisor/pending-transfers", "host": ["{{base_url}}"], "path": ["api", "employees", "supervisor", "pending-transfers"]}
+          }
+        },
+        {
+          "name": "7.3 ✅ Approve Transfer (SUCCESS)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Usar transferId del ambiente",
+                  "// Por defecto usamos 1"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{supervisor_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/supervisor/approve-transfer/{{transfer_id}}", "host": ["{{base_url}}"], "path": ["api", "employees", "supervisor", "approve-transfer", "{{transfer_id}}"]}
+          }
+        },
+        {
+          "name": "7.4 ✅ Reject Transfer (SUCCESS)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{supervisor_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/supervisor/reject-transfer/{{transfer_id}}", "host": ["{{base_url}}"], "path": ["api", "employees", "supervisor", "reject-transfer", "{{transfer_id}}"]}
+          }
+        },
+        {
+          "name": "7.5 ❌ Approve Transfer - Sin token",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/employees/supervisor/approve-transfer/1", "host": ["{{base_url}}"], "path": ["api", "employees", "supervisor", "approve-transfer", "1"]}
+          }
+        },
+        {
+          "name": "7.6 ❌ Approve Own Transfer - RN-11 (BUSINESS RULE)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{supervisor_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/supervisor/approve-transfer/999", "host": ["{{base_url}}"], "path": ["api", "employees", "supervisor", "approve-transfer", "999"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "8️⃣ INTERNAL ANALYSTS",
+      "description": "Analistas internos: aprobar/rechazar/disbursar préstamos",
+      "item": [
+        {
+          "name": "8.1 ✅ Register - Analista Interno (SUCCESS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('✅ Analista registrado exitosamente');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alejandro Moreno Díaz\",\n  \"identificationId\": \"12345690K\",\n  \"email\": \"alejandro.analyst@banco.es\",\n  \"phone\": \"+34912345689\",\n  \"address\": \"Calle Análisis 100, Madrid\",\n  \"birthDate\": \"1989-12-08\",\n  \"username\": \"alejandro.analyst\",\n  \"password\": \"AnalystPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/analyst/register", "host": ["{{base_url}}"], "path": ["api", "employees", "analyst", "register"]}
+          }
+        },
+        {
+          "name": "8.2 ✅ Get Pending Loans (SUCCESS)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/analyst/pending-loans", "host": ["{{base_url}}"], "path": ["api", "employees", "analyst", "pending-loans"]}
+          }
+        },
+        {
+          "name": "8.3 ✅ Approve Loan (SUCCESS)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approvedAmount\": 5000,\n  \"interestRate\": 4.5\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/analyst/approve-loan/{{loan_id}}", "host": ["{{base_url}}"], "path": ["api", "employees", "analyst", "approve-loan", "{{loan_id}}"]}
+          }
+        },
+        {
+          "name": "8.4 ✅ Reject Loan (SUCCESS)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/analyst/reject-loan/{{loan_id}}", "host": ["{{base_url}}"], "path": ["api", "employees", "analyst", "reject-loan", "{{loan_id}}"]}
+          }
+        },
+        {
+          "name": "8.5 ✅ Disburse Loan (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinationAccount\": \"ES1234567890123456789012\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/analyst/disburse-loan/{{loan_id}}", "host": ["{{base_url}}"], "path": ["api", "employees", "analyst", "disburse-loan", "{{loan_id}}"]}
+          }
+        },
+        {
+          "name": "8.6 ❌ Reject Loan - Sin token",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/employees/analyst/reject-loan/1", "host": ["{{base_url}}"], "path": ["api", "employees", "analyst", "reject-loan", "1"]}
+          }
+        },
+        {
+          "name": "8.7 ❌ Approve Loan - InterestRate negativo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approvedAmount\": 5000,\n  \"interestRate\": -2.5\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/analyst/approve-loan/1", "host": ["{{base_url}}"], "path": ["api", "employees", "analyst", "approve-loan", "1"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "9️⃣ SECURITY & ROLE VALIDATION",
+      "description": "Validaciones de seguridad, roles y restricciones de negocio",
+      "item": [
+        {
+          "name": "9.1 ❌ Access without JWT token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/customers/individual/my-accounts", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "my-accounts"]}
+          }
+        },
+        {
+          "name": "9.2 ❌ Access with Invalid JWT token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer invalid_token_xyz"}
+            ],
+            "url": {"raw": "{{base_url}}/api/customers/individual/my-accounts", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "my-accounts"]}
+          }
+        },
+        {
+          "name": "9.3 ❌ COMMERCIAL EMPLOYEE - No puede crear transferencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{analyst_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccount\": \"ES1111111111111111111111\",\n  \"destinationAccount\": \"ES2222222222222222222222\",\n  \"amount\": 1000\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/commercial/transfer", "host": ["{{base_url}}"], "path": ["api", "employees", "commercial", "transfer"]}
+          }
+        },
+        {
+          "name": "9.4 ❌ TELLER - No puede rechazar transferencias",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{teller_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/supervisor/reject-transfer/1", "host": ["{{base_url}}"], "path": ["api", "employees", "supervisor", "reject-transfer", "1"]}
+          }
+        },
+        {
+          "name": "9.5 ❌ SUPERVISOR - No puede disbursar préstamos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{supervisor_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinationAccount\": \"ES1234567890123456789012\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/analyst/disburse-loan/1", "host": ["{{base_url}}"], "path": ["api", "employees", "analyst", "disburse-loan", "1"]}
+          }
+        },
+        {
+          "name": "9.6 ❌ RN-11: Supervisor no aprueba propias transferencias",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{supervisor_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/api/employees/supervisor/approve-transfer/999", "host": ["{{base_url}}"], "path": ["api", "employees", "supervisor", "approve-transfer", "999"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔟 DATA VALIDATION EDGE CASES",
+      "description": "Validación de campos, límites y casos extremos",
+      "item": [
+        {
+          "name": "10.1 ❌ Register - Duplicated IdentificationId",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo Cliente\",\n  \"identificationId\": \"12345678A\",\n  \"email\": \"otro@email.com\",\n  \"phone\": \"+34912345690\",\n  \"birthDate\": \"1995-01-01\",\n  \"address\": \"Calle Nueva 999\",\n  \"username\": \"nuevo_usuario\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/register", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "register"]}
+          }
+        },
+        {
+          "name": "10.2 ❌ Register - Phone inválido (no sigue formato)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Prueba Teléfono\",\n  \"identificationId\": \"99999999Z\",\n  \"email\": \"telefono@email.com\",\n  \"phone\": \"invalid_phone\",\n  \"birthDate\": \"1990-01-01\",\n  \"address\": \"Calle Test\",\n  \"username\": \"test_phone\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/register", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "register"]}
+          }
+        },
+        {
+          "name": "10.3 ❌ Transfer - Cuenta origen = destino",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{corporate_employee_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccount\": \"ES1111111111111111111111\",\n  \"destinationAccount\": \"ES1111111111111111111111\",\n  \"amount\": 1000\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/corporate/transfer", "host": ["{{base_url}}"], "path": ["api", "employees", "corporate", "transfer"]}
+          }
+        },
+        {
+          "name": "10.4 ❌ Loan - Amount > MaxLimit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{individual_customer_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanType\": \"PERSONAL\",\n  \"requestedAmount\": 999999999,\n  \"termMonths\": 360,\n  \"productCode\": \"PRSTM001\",\n  \"productName\": \"Préstamo Personal\",\n  \"category\": \"PERSONAL\",\n  \"destinationAccount\": \"ES1234567890123456789012\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/customers/individual/request-loan", "host": ["{{base_url}}"], "path": ["api", "customers", "individual", "request-loan"]}
+          }
+        },
+        {
+          "name": "10.5 ❌ Withdraw - Fondos insuficientes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{teller_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNumber\": \"ES5555555555555555555555\",\n  \"amount\": 999999\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/employees/teller/withdraw", "host": ["{{base_url}}"], "path": ["api", "employees", "teller", "withdraw"]}
+          }
+        }
+      ]
+    }
+  ]
+}

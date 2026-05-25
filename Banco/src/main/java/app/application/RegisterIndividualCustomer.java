@@ -5,7 +5,6 @@ import app.domain.models.User;
 import app.domain.models.enums.SystemRole;
 import app.domain.models.enums.UserStatus;
 import app.domain.ports.IUserPort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,15 +14,13 @@ import java.time.Period;
 public class RegisterIndividualCustomer {
 
     private final IUserPort userPort;
-    private final PasswordEncoder passwordEncoder;
 
-    public RegisterIndividualCustomer(IUserPort userPort, PasswordEncoder passwordEncoder) {
+    public RegisterIndividualCustomer(IUserPort userPort) {
         this.userPort = userPort;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public IndividualCustomer register(IndividualCustomer customer,
-                                       String username, String password) {
+                            String username, String password) {
         validateFields(customer, username, password);
         validateAge(customer.getBirthDate());
         validateEmail(customer.getEmail());
@@ -38,23 +35,22 @@ public class RegisterIndividualCustomer {
         return customer;
     }
 
-    private void validateFields(IndividualCustomer customer,
-                                String username, String password) {
-        if (customer.getName() == null || customer.getName().isEmpty())
+private void validateFields(IndividualCustomer customer, String username, String password) {
+        if (customer.getName() == null || customer.getName().isBlank())
             throw new IllegalArgumentException("El nombre es obligatorio.");
-        if (customer.getIdentificationId() == null || customer.getIdentificationId().isEmpty())
+        if (customer.getIdentificationId() == null || customer.getIdentificationId().isBlank())
             throw new IllegalArgumentException("El número de identificación es obligatorio.");
-        if (customer.getEmail() == null || customer.getEmail().isEmpty())
+        if (customer.getEmail() == null || customer.getEmail().isBlank())
             throw new IllegalArgumentException("El correo electrónico es obligatorio.");
-        if (customer.getPhone() == null || customer.getPhone().isEmpty())
+        if (customer.getPhone() == null || customer.getPhone().isBlank())
             throw new IllegalArgumentException("El teléfono es obligatorio.");
-        if (customer.getAddress() == null || customer.getAddress().isEmpty())
+        if (customer.getAddress() == null || customer.getAddress().isBlank())
             throw new IllegalArgumentException("La dirección es obligatoria.");
         if (customer.getBirthDate() == null)
             throw new IllegalArgumentException("La fecha de nacimiento es obligatoria.");
-        if (username == null || username.isEmpty())
+        if (username == null || username.isBlank())
             throw new IllegalArgumentException("El nombre de usuario es obligatorio.");
-        if (password == null || password.isEmpty())
+        if (password == null || password.isBlank())
             throw new IllegalArgumentException("La contraseña es obligatoria.");
     }
 
@@ -91,7 +87,7 @@ public class RegisterIndividualCustomer {
         user.setAddress(customer.getAddress());
         user.setSystemRole(SystemRole.INDIVIDUAL_CUSTOMER);
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
+        user.setPassword(password);
         user.setUserStatus(UserStatus.ACTIVE);
         return user;
     }
